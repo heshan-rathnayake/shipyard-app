@@ -5,6 +5,41 @@ __metadata:
   version: 9
   cacheKey: 10c0
 
+"@auth/core@npm:0.41.2":
+  version: 0.41.2
+  resolution: "@auth/core@npm:0.41.2"
+  dependencies:
+    "@panva/hkdf": "npm:^1.2.1"
+    jose: "npm:^6.0.6"
+    oauth4webapi: "npm:^3.3.0"
+    preact: "npm:10.24.3"
+    preact-render-to-string: "npm:6.5.11"
+  peerDependencies:
+    "@simplewebauthn/browser": ^9.0.1
+    "@simplewebauthn/server": ^9.0.2
+    nodemailer: ^7.0.7
+  peerDependenciesMeta:
+    "@simplewebauthn/browser":
+      optional: true
+    "@simplewebauthn/server":
+      optional: true
+    nodemailer:
+      optional: true
+  checksum: 10c0/a8309434a91bb678c5dd644b97ae8ed0935426808f4251ddd5f888b845c152393718978d631ffdf48ed13c2626dae146665592b6be66b7e1c06356764a89dce4
+  languageName: node
+  linkType: hard
+
+"@auth/prisma-adapter@npm:^2.11.2":
+  version: 2.11.2
+  resolution: "@auth/prisma-adapter@npm:2.11.2"
+  dependencies:
+    "@auth/core": "npm:0.41.2"
+  peerDependencies:
+    "@prisma/client": ">=2.26.0 || >=3 || >=4 || >=5 || >=6"
+  checksum: 10c0/5d878fedfd3a351a64807f0d32588d758ec3d2a692319fbfee830d17c8d275ea89c33d598d28a99379e006976d3a20f3827965cadaf7e5b8c3d63e608cc0fb4c
+  languageName: node
+  linkType: hard
+
 "@biomejs/biome@npm:^2.4.13":
   version: 2.4.13
   resolution: "@biomejs/biome@npm:2.4.13"
@@ -438,6 +473,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@panva/hkdf@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@panva/hkdf@npm:1.2.1"
+  checksum: 10c0/1fabdec9bd2c19b8e88a3fa6fd0c25e25823c5000d9efdf4b6dfe32e9f370f8b9603cf776d120d160bec15fba17e079974cc34f0f52cebb24602cd832dfde19c
+  languageName: node
+  linkType: hard
+
 "@prisma/adapter-pg@npm:^7.8.0":
   version: 7.8.0
   resolution: "@prisma/adapter-pg@npm:7.8.0"
@@ -734,7 +776,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shipyard/db@workspace:packages/db":
+"@shipyard/db@npm:*, @shipyard/db@workspace:packages/db":
   version: 0.0.0-use.local
   resolution: "@shipyard/db@workspace:packages/db"
   dependencies:
@@ -774,12 +816,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@shipyard/web@workspace:apps/web"
   dependencies:
+    "@auth/prisma-adapter": "npm:^2.11.2"
+    "@shipyard/db": "npm:*"
     "@shipyard/typescript-config": "npm:*"
     "@shipyard/ui": "npm:*"
     "@types/node": "npm:^22.15.3"
     "@types/react": "npm:19.2.2"
     "@types/react-dom": "npm:19.2.2"
     next: "npm:16.2.0"
+    next-auth: "npm:^5.0.0-beta.31"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     typescript: "npm:5.9.2"
@@ -1213,6 +1258,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jose@npm:^6.0.6":
+  version: 6.2.3
+  resolution: "jose@npm:6.2.3"
+  checksum: 10c0/aa91bccba22cc84d86308f833749bcb0b00441e35c24e0ac79abeac5f76dc62d47bdef9c1da6a0c609f5da6478595f52b252085888b89dbdb163861e40ea4188
+  languageName: node
+  linkType: hard
+
 "json-schema-traverse@npm:^1.0.0":
   version: 1.0.0
   resolution: "json-schema-traverse@npm:1.0.0"
@@ -1266,6 +1318,28 @@ __metadata:
   bin:
     nanoid: bin/nanoid.cjs
   checksum: 10c0/ba142b7b39e11e80c16dd74b0365d407880c87c1cf7e1480956981ae940ee36060fa5b6f092cd1e315184dd19244c657bd017d03327bd3c62247d691c5e8edfb
+  languageName: node
+  linkType: hard
+
+"next-auth@npm:^5.0.0-beta.31":
+  version: 5.0.0-beta.31
+  resolution: "next-auth@npm:5.0.0-beta.31"
+  dependencies:
+    "@auth/core": "npm:0.41.2"
+  peerDependencies:
+    "@simplewebauthn/browser": ^9.0.1
+    "@simplewebauthn/server": ^9.0.2
+    next: ^14.0.0-0 || ^15.0.0 || ^16.0.0
+    nodemailer: ^7.0.7
+    react: ^18.2.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@simplewebauthn/browser":
+      optional: true
+    "@simplewebauthn/server":
+      optional: true
+    nodemailer:
+      optional: true
+  checksum: 10c0/9c021909f3b774f2967f706f5b060d9e8ab6ebd5907f4e810caf6838e983f4e10a3db5481c1de3e3a273f7ea3feeddeff6092a91662a5f5ca7bbf54f439c27d4
   languageName: node
   linkType: hard
 
@@ -1326,6 +1400,13 @@ __metadata:
   bin:
     next: dist/bin/next
   checksum: 10c0/cd1adeee535e1e9cca1efeca704b0fda2e09992c1f8889ed75d54635b803a3875748bbfecefedb20d9dd70c2cb8f974ffeeda8bffa2a6ac902ffe968a012f795
+  languageName: node
+  linkType: hard
+
+"oauth4webapi@npm:^3.3.0":
+  version: 3.8.6
+  resolution: "oauth4webapi@npm:3.8.6"
+  checksum: 10c0/479810716702c5616e4a0eb80d4f1c264a6a2b63b04061a62a59375e195d2726e947507ede98e41ee3f9ca800f159621ea371c36f5c4346d015b6ec03e477440
   languageName: node
   linkType: hard
 
@@ -1508,6 +1589,22 @@ __metadata:
   version: 3.4.7
   resolution: "postgres@npm:3.4.7"
   checksum: 10c0/b2e61b1064d38e7e1df8291f6d5a7e11f892a3240e00cf2b5e5542bf9abbfe97f3963164aeb56b42c1ab6b8aae3454c57f5bbc1791df0769375542740a7cde72
+  languageName: node
+  linkType: hard
+
+"preact-render-to-string@npm:6.5.11":
+  version: 6.5.11
+  resolution: "preact-render-to-string@npm:6.5.11"
+  peerDependencies:
+    preact: ">=10"
+  checksum: 10c0/a68b704c1343756022fb41322154b45e39f6021b940cbc97e86c292627d017d019700339a17d67b42c308b14fc5323fc120c798f785d6a3e993c8f273610bfe2
+  languageName: node
+  linkType: hard
+
+"preact@npm:10.24.3":
+  version: 10.24.3
+  resolution: "preact@npm:10.24.3"
+  checksum: 10c0/c863df6d7be6a660480189762d8a8f2d4148733fc2bb9efbd9d2fd27315d2c7ede850a16077d716c91666c915c0349bd3c9699733e4f08457226a0519f408761
   languageName: node
   linkType: hard
 
