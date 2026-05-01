@@ -8,9 +8,9 @@ services:
     environment:
       POSTGRES_DB: shipyard_dev
       POSTGRES_USER: shipyard
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shipyard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - shipyard_postgres_data:/var/lib/postgresql/data
+      - shipyard_postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U shipyard"]
       interval: 10s
@@ -22,8 +22,8 @@ services:
     container_name: shipyard_mail
     restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "1025:1025"   # SMTP — configure Nodemailer/Resend to use this in dev
+      - "8025:8025"   # Web UI — http://localhost:8025
 
 volumes:
   shipyard_postgres_data:
