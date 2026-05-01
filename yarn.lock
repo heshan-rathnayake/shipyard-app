@@ -2620,6 +2620,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@shipyard/api@workspace:^, @shipyard/api@workspace:packages/api":
+  version: 0.0.0-use.local
+  resolution: "@shipyard/api@workspace:packages/api"
+  dependencies:
+    "@shipyard/typescript-config": "npm:*"
+    "@trpc/server": "npm:^11.17.0"
+    "@types/node": "npm:^22"
+    typescript: "npm:5.9.2"
+    zod: "npm:^4.4.1"
+  languageName: unknown
+  linkType: soft
+
 "@shipyard/db@npm:*, @shipyard/db@workspace:packages/db":
   version: 0.0.0-use.local
   resolution: "@shipyard/db@workspace:packages/db"
@@ -2663,10 +2675,14 @@ __metadata:
   resolution: "@shipyard/web@workspace:apps/web"
   dependencies:
     "@auth/prisma-adapter": "npm:^2.11.2"
+    "@shipyard/api": "workspace:^"
     "@shipyard/db": "npm:*"
     "@shipyard/typescript-config": "npm:*"
     "@shipyard/ui": "npm:*"
     "@tailwindcss/postcss": "npm:^4.2.4"
+    "@tanstack/react-query": "npm:^5.100.7"
+    "@trpc/client": "npm:^11.17.0"
+    "@trpc/react-query": "npm:^11.17.0"
     "@types/node": "npm:^22.15.3"
     "@types/react": "npm:19.2.2"
     "@types/react-dom": "npm:19.2.2"
@@ -2871,6 +2887,60 @@ __metadata:
     postcss: "npm:^8.5.6"
     tailwindcss: "npm:4.2.4"
   checksum: 10c0/e6abad7065558bf3c39d30f392100c934c3381a572df21d934dd5a9399e0a62e16ba3d74a51ec0b1d670b1990ae73d01dfc560db0bf0e24bad827e00be0e62c2
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:5.100.7":
+  version: 5.100.7
+  resolution: "@tanstack/query-core@npm:5.100.7"
+  checksum: 10c0/249ca6e07e69df1646da9fd9c01e9fce0f45c17c855be2cb2321098d049a5e3f0f40d13a66cc75d3aafe7dd90a4984e99aa640eac4b9c01205c5cc3fe6aee7b1
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.100.7":
+  version: 5.100.7
+  resolution: "@tanstack/react-query@npm:5.100.7"
+  dependencies:
+    "@tanstack/query-core": "npm:5.100.7"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/c20eebadb2bbb195d29b0071317470ec08c7e225ac760f87d022c3a57d28092e6d1c25fac15ebea536f084dca813fd36a0d6cbca1c9b8b1360891c44bef2d67c
+  languageName: node
+  linkType: hard
+
+"@trpc/client@npm:^11.17.0":
+  version: 11.17.0
+  resolution: "@trpc/client@npm:11.17.0"
+  peerDependencies:
+    "@trpc/server": 11.17.0
+    typescript: ">=5.7.2"
+  bin:
+    intent: bin/intent.js
+  checksum: 10c0/f18061128f28a5a5e27551d5facf11e10a591a2e8e28d93601cebf541025f3aee459500d252343e25e4d7e913623cdd3455e1fab23979cb83e174cecd40e3163
+  languageName: node
+  linkType: hard
+
+"@trpc/react-query@npm:^11.17.0":
+  version: 11.17.0
+  resolution: "@trpc/react-query@npm:11.17.0"
+  peerDependencies:
+    "@tanstack/react-query": ^5.80.3
+    "@trpc/client": 11.17.0
+    "@trpc/server": 11.17.0
+    react: ">=18.2.0"
+    typescript: ">=5.7.2"
+  checksum: 10c0/4ab1c3c124a832b00b5d6acc4c1a53b80cdcbe3b6d192508cd588fe2a3c03441f196b0c18341b2f4b5baefa4986e4d2ebc6ded11011ac3a7972671fe790002f9
+  languageName: node
+  linkType: hard
+
+"@trpc/server@npm:^11.17.0":
+  version: 11.17.0
+  resolution: "@trpc/server@npm:11.17.0"
+  peerDependencies:
+    typescript: ">=5.7.2"
+  bin:
+    intent: bin/intent.js
+  checksum: 10c0/84c1a1db748d69f248ef52631e75d4f0fe029f60990b6fdca28356a52d73f8881ab6c0e1ea56026e5a1ab7bbd97d710bc99351290407f5601620bafdfeacf06f
   languageName: node
   linkType: hard
 
@@ -6803,7 +6873,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.25 || ^4.0":
+"zod@npm:^3.25 || ^4.0, zod@npm:^4.4.1":
   version: 4.4.1
   resolution: "zod@npm:4.4.1"
   checksum: 10c0/55714c4bea81f7851ac46bf9edfde7c63ed6677a6cc8971ed3a526a079de3ffbe2bd56160327d22e070f72854fc4485b98ab7373255b6b69d64d9067caec864e
