@@ -1,0 +1,35 @@
+// Audit trail and email delivery tracking
+
+model ActivityLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  memberId       String
+  action         String
+  entityType     String
+  entityId       String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  member       Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([memberId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model EmailLog {
+  id            String      @id @default(cuid())
+  recipient     String
+  subject       String
+  templateName  String
+  templateData  Json
+  status        EmailStatus @default(PENDING)
+  retryAttempts Int         @default(0)
+  deliveredAt   DateTime?
+  failureReason String?     @db.Text
+  createdAt     DateTime    @default(now())
+
+  @@index([status, createdAt])
+  @@index([recipient, status])
+}

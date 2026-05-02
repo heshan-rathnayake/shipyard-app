@@ -1,0 +1,41 @@
+// Stripe subscriptions and webhook event queue
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  stripeSubscriptionId String             @unique
+  stripePriceId        String
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([stripeSubscriptionId])
+}
+
+model WebhookEvent {
+  id              String    @id @default(cuid())
+  stripeEventId   String    @unique
+  eventType       String
+  eventData       Json
+  processed       Boolean   @default(false)
+  processingError String?   @db.Text
+  retryAttempts   Int       @default(0)
+  maxRetries      Int       @default(3)
+  // Marks events queued for exponential-backoff retry
+  retryQueue      Boolean   @default(false)
+  nextRetryAt     DateTime?
+  // Events exceeding maxRetries are moved here for manual inspection
+  deadLetter      Boolean   @default(false)
+  priority        Int       @default(0)
+  createdAt       DateTime  @default(now())
+  processedAt     DateTime?
+
+  @@index([retryQueue, nextRetryAt])
+  @@index([processed, createdAt])
+  @@index([stripeEventId])
+}
