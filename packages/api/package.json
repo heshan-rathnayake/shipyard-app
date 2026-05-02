@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
-    "./server": "./src/server/index.ts"
+    "./server/trpc": "./src/server/trpc.ts",
+    "./server/context": "./src/server/context.ts",
+    "./server/routers/_app": "./src/server/routers/_app.ts"
   },
   "devDependencies": {
     "@shipyard/typescript-config": "*",
