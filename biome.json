@@ -21,6 +21,16 @@
       "trailingCommas": "es5"
     }
   },
+  "css": {
+    "linter": {
+      "enabled": true,
+      "rules": {
+        "nursery": {
+          "noUnknownAtRule": "off"
+        }
+      }
+    }
+  },
   "files": {
     "ignore": [
       "node_modules",

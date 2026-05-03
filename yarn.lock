@@ -2632,7 +2632,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@shipyard/db@npm:*, @shipyard/db@workspace:packages/db":
+"@shipyard/db@workspace:^, @shipyard/db@workspace:packages/db":
   version: 0.0.0-use.local
   resolution: "@shipyard/db@workspace:packages/db"
   dependencies:
@@ -2654,7 +2654,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@shipyard/ui@npm:*, @shipyard/ui@workspace:packages/ui":
+"@shipyard/ui@workspace:^, @shipyard/ui@workspace:packages/ui":
   version: 0.0.0-use.local
   resolution: "@shipyard/ui@workspace:packages/ui"
   dependencies:
@@ -2662,7 +2662,10 @@ __metadata:
     "@types/node": "npm:^22.15.3"
     "@types/react": "npm:19.2.2"
     "@types/react-dom": "npm:19.2.2"
+    class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
+    lucide-react: "npm:^1.14.0"
+    radix-ui: "npm:^1.4.3"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     tailwind-merge: "npm:^3.5.0"
@@ -2676,9 +2679,9 @@ __metadata:
   dependencies:
     "@auth/prisma-adapter": "npm:^2.11.2"
     "@shipyard/api": "workspace:^"
-    "@shipyard/db": "npm:*"
+    "@shipyard/db": "workspace:^"
     "@shipyard/typescript-config": "npm:*"
-    "@shipyard/ui": "npm:*"
+    "@shipyard/ui": "workspace:^"
     "@tailwindcss/postcss": "npm:^4.2.4"
     "@tanstack/react-query": "npm:^5.100.7"
     "@trpc/client": "npm:^11.17.0"
