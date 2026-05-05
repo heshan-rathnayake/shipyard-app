@@ -21,5 +21,5 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = db
 }
 
-export { Prisma } from "@prisma/client"
+export { Prisma, SubscriptionTier, MemberRole, ProjectStatus, TaskStatus, Priority, SubscriptionStatus, EmailStatus } from "@prisma/client"
 export type { PrismaClient } from "@prisma/client"
