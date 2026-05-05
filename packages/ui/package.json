@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
+    "./hooks/*": "./src/hooks/*.ts",
+    "./lib/*": "./src/lib/*.ts",
     "./*": "./src/*.tsx"
   },
   "scripts": {
