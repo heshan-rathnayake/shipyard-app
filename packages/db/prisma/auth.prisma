@@ -43,6 +43,18 @@ model User {
   accounts Account[]
   sessions Session[]
   member   Member[]
+  password Password?
+}
+
+// Separate from User so OAuth-only users have no row here.
+// Mirrors how Account isolates OAuth tokens from User identity.
+model Password {
+  userId      String   @id
+  hash        String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
