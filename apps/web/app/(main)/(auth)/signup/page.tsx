@@ -5,9 +5,15 @@ import { SignupForm } from "./signup-form";
 
 export const metadata: Metadata = { title: "Create account" };
 
-export default async function SignupPage() {
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
   const session = await auth();
   if (session) redirect("/dashboard");
+
+  const { callbackUrl } = await searchParams;
 
   return (
     <div className="w-full max-w-sm space-y-6">
@@ -18,7 +24,7 @@ export default async function SignupPage() {
         </p>
       </div>
 
-      <SignupForm />
+      <SignupForm callbackUrl={callbackUrl} />
     </div>
   );
 }

@@ -10,8 +10,12 @@ import { Label } from "@shipyard/ui/components/label";
 
 const initialState: RegisterState = { status: "idle" };
 
-export function SignupForm() {
+export function SignupForm({ callbackUrl }: { callbackUrl?: string }) {
   const [state, action, isPending] = useActionState(register, initialState);
+
+  const loginHref = callbackUrl
+    ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    : "/login";
 
   if (state.status === "success") {
     return (
@@ -20,7 +24,7 @@ export function SignupForm() {
         <p className="text-sm text-muted-foreground">
           We sent a verification link to your email address. Click it to
           activate your account, then{" "}
-          <Link href="/login" className="underline underline-offset-4">
+          <Link href={loginHref} className="underline underline-offset-4">
             sign in
           </Link>
           .
@@ -32,6 +36,9 @@ export function SignupForm() {
 
   return (
     <form action={action} className="space-y-4">
+      {callbackUrl && (
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+      )}
       <div className="space-y-1.5">
         <Label htmlFor="name">Name</Label>
         <Input
