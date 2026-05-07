@@ -9,6 +9,8 @@
       "@shipyard/ui": ["../../packages/ui/src"],
       "@shipyard/ui/*": ["../../packages/ui/src/*"],
       "@shipyard/api": ["../../packages/api/src"],
+      "@shipyard/email": ["../../packages/email"],
+      
     }
   },
   "include": [

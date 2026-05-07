@@ -4,7 +4,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { db } from "@shipyard/db";
-import { sendEmail } from "@/server/email";
+import { sendEmail } from "@shipyard/email";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,6 +29,7 @@ export async function register(
     email: formData.get("email"),
     password: formData.get("password"),
   };
+  const callbackUrl = (formData.get("callbackUrl") as string | null) ?? undefined;
 
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) {
@@ -78,7 +79,8 @@ export async function register(
       data: { identifier: email, token, expires },
     });
 
-    const verifyUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+    const cbParam = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : "";
+    const verifyUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}&email=${encodeURIComponent(email)}${cbParam}`;
 
     await sendEmail({
       to: email,
