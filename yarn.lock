@@ -2624,6 +2624,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@shipyard/api@workspace:packages/api"
   dependencies:
+    "@shipyard/email": "workspace:^"
     "@shipyard/typescript-config": "npm:*"
     "@trpc/server": "npm:^11.17.0"
     "@types/node": "npm:^22"
@@ -2644,6 +2645,20 @@ __metadata:
     dotenv: "npm:^16.3.1"
     pg: "npm:^8.20.0"
     prisma: "npm:^7.0.0"
+    server-only: "npm:^0.0.1"
+    typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@shipyard/email@workspace:^, @shipyard/email@workspace:packages/email":
+  version: 0.0.0-use.local
+  resolution: "@shipyard/email@workspace:packages/email"
+  dependencies:
+    "@shipyard/typescript-config": "npm:*"
+    "@types/node": "npm:^22"
+    "@types/nodemailer": "npm:^8.0.0"
+    nodemailer: "npm:^8.0.7"
+    resend: "npm:^6.12.2"
     typescript: "npm:5.9.2"
   languageName: unknown
   linkType: soft
@@ -2680,6 +2695,7 @@ __metadata:
     "@auth/prisma-adapter": "npm:^2.11.2"
     "@shipyard/api": "workspace:^"
     "@shipyard/db": "workspace:^"
+    "@shipyard/email": "workspace:^"
     "@shipyard/typescript-config": "npm:*"
     "@shipyard/ui": "workspace:^"
     "@tailwindcss/postcss": "npm:^4.2.4"
@@ -2688,7 +2704,6 @@ __metadata:
     "@trpc/react-query": "npm:^11.17.0"
     "@types/bcryptjs": "npm:^3.0.0"
     "@types/node": "npm:^22.15.3"
-    "@types/nodemailer": "npm:^8.0.0"
     "@types/react": "npm:19.2.2"
     "@types/react-dom": "npm:19.2.2"
     bcryptjs: "npm:^3.0.3"
@@ -2698,18 +2713,17 @@ __metadata:
     next: "npm:16.2.0"
     next-auth: "npm:^5.0.0-beta.31"
     next-themes: "npm:^0.4.6"
-    nodemailer: "npm:^8.0.7"
     postcss: "npm:^8.5.13"
     radix-ui: "npm:^1.4.3"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
-    resend: "npm:^6.12.2"
     shadcn: "npm:^4.6.0"
     tailwind-merge: "npm:^3.5.0"
     tailwindcss: "npm:^4.2.4"
     tw-animate-css: "npm:^1.4.0"
     typescript: "npm:5.9.2"
     zod: "npm:^4.4.3"
+    zustand: "npm:^5.0.13"
   languageName: unknown
   linkType: soft
 
@@ -6128,6 +6142,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"server-only@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "server-only@npm:0.0.1"
+  checksum: 10c0/4704f0ef85da0be981af6d4ed8e739d39bcfd265b9c246a684060acda5642d0fdc6daffc2308e71e2682c5f508090978802eae0a77623c9b90a49f9ae68048d6
+  languageName: node
+  linkType: hard
+
 "set-cookie-parser@npm:^3.0.1":
   version: 3.1.0
   resolution: "set-cookie-parser@npm:3.1.0"
@@ -7003,5 +7024,26 @@ __metadata:
   version: 4.4.3
   resolution: "zod@npm:4.4.3"
   checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.13":
+  version: 5.0.13
+  resolution: "zustand@npm:5.0.13"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10c0/e4e76af1c324c797e3cc6ef094cb15c5884ca6713697140c2be292b2c612f5445fa21d222671b97797a4376154cac14a140f05728f0ac17b4b9e10f45e0ff29e
   languageName: node
   linkType: hard

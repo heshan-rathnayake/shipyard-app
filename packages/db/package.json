@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./enum": "./src/enum.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -15,7 +16,8 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.0.0",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@shipyard/typescript-config": "*",
