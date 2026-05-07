@@ -18,13 +18,13 @@ const AUTH_ERRORS: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; verified?: string }>;
+  searchParams: Promise<{ error?: string; verified?: string; callbackUrl?: string }>;
 }) {
   // Permission check in page.tsx — never in layout.tsx
   const session = await auth();
   if (session) redirect("/dashboard");
 
-  const { error, verified } = await searchParams;
+  const { error, verified, callbackUrl } = await searchParams;
   const isVerified = verified === "true";
   const errorMessage = error
     ? (AUTH_ERRORS[error] ?? "An unexpected error occurred. Please try again.")
@@ -53,7 +53,7 @@ export default async function LoginPage({
         </p>
       )}
 
-      <LoginButtons />
+      <LoginButtons callbackUrl={callbackUrl ?? "/dashboard"} />
 
       <p className="text-center text-xs text-muted-foreground">
         By signing in, you agree to our Terms of Service and Privacy Policy.
