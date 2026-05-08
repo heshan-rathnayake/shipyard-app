@@ -1,0 +1,63 @@
+import { z } from "zod";
+import { router, protectedProcedure } from "../trpc";
+import { requireMembership, requireManagerRole } from "../../lib/membership";
+
+export const activityLogRouter = router({
+  /**
+   * Paginated audit log for an org.
+   * Accessible to OWNER and ADMIN only.
+   */
+  list: protectedProcedure
+    .input(
+      z.object({
+        orgId: z.string(),
+        /** Filter to a specific entity type (e.g. "MEMBER", "INVITATION") */
+        entityType: z.string().optional(),
+        /** Cursor = last seen ActivityLog id, for keyset pagination */
+        cursor: z.string().optional(),
+        limit: z.number().min(1).max(100).default(50),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
+      requireManagerRole(caller.role);
+
+      const logs = await ctx.db.activityLog.findMany({
+        where: {
+          organizationId: input.orgId,
+          ...(input.entityType ? { entityType: input.entityType } : {}),
+        },
+        cursor: input.cursor ? { id: input.cursor } : undefined,
+        skip: input.cursor ? 1 : 0,
+        select: {
+          id: true,
+          action: true,
+          entityType: true,
+          entityId: true,
+          metadata: true,
+          createdAt: true,
+          member: {
+            select: {
+              id: true,
+              role: true,
+              user: {
+                select: { id: true, name: true, email: true, image: true },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        take: input.limit + 1,
+      });
+
+      const hasMore = logs.length > input.limit;
+      const items = hasMore ? logs.slice(0, input.limit) : logs;
+      const nextCursor = hasMore ? (items[items.length - 1]?.id ?? null) : null;
+
+      return { items, nextCursor };
+    }),
+});
