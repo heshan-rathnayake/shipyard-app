@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { LayoutDashboard, Settings, Users } from "lucide-react";
+import { Activity, LayoutDashboard, Settings, Users } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -67,6 +67,18 @@ export function NavMain() {
                   <Link href={`/org/${orgId}/members`}>
                     <Users />
                     <span>Members</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === `/org/${orgId}/activity`}
+                  tooltip="Activity"
+                >
+                  <Link href={`/org/${orgId}/activity`}>
+                    <Activity />
+                    <span>Activity</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
