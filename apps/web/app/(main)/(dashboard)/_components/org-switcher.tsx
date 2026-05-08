@@ -50,28 +50,31 @@ export function OrgSwitcher({
   const pathname = usePathname();
   const router = useRouter();
 
-  const { activeOrgId, setActiveOrgId } = useOrgStore();
+  const { activeOrgSlug, setActiveOrgSlug } = useOrgStore();
 
-  function handleOrgChange(orgId: string) {
-    setActiveOrgId(orgId);
-    // If currently on an org-scoped page, navigate to the same sub-page for the new org
-    const match = pathname.match(/^\/org\/[^/]+(\/.*)?$/);
-    if (match) {
-      const subPath = match[1] ?? "";
-      router.push(`/org/${orgId}${subPath}`);
+  function handleOrgChange(orgSlug: string) {
+    setActiveOrgSlug(orgSlug);
+    // If currently on a page of the active org, navigate to the same sub-page for the new org.
+    // Guard on activeOrgSlug so the regex is never built with an undefined slug.
+    if (activeOrgSlug) {
+      const match = pathname.match(new RegExp(`^\\/${activeOrgSlug}(\\/.*)?$`));
+      if (match) {
+        const subPath = match[1] ?? "";
+        router.push(`/${orgSlug}${subPath}`);
+      }
     }
   }
 
   // Initialize the store with the first org on mount (store starts as null)
   React.useEffect(() => {
     const firstOrg = orgs[0];
-    if (!activeOrgId && firstOrg) {
-      setActiveOrgId(firstOrg.id);
+    if (!activeOrgSlug && firstOrg) {
+      setActiveOrgSlug(firstOrg.slug);
     }
-  }, [activeOrgId, orgs, setActiveOrgId]);
+  }, [activeOrgSlug, orgs, setActiveOrgSlug]);
 
-  // Derive the full org object from the store id; fall back to first org before store initializes
-  const activeOrg = orgs.find((o) => o.id === activeOrgId) ?? orgs[0];
+  // Derive the full org object from the store slug; fall back to first org before store initializes
+  const activeOrg = orgs.find((o) => o.slug === activeOrgSlug) ?? orgs[0];
 
   if (!activeOrg) return null;
 
@@ -111,7 +114,7 @@ export function OrgSwitcher({
               {orgs.map((org, index) => (
                 <DropdownMenuItem
                   key={org.id}
-                  onClick={() => handleOrgChange(org.id)}
+                  onClick={() => handleOrgChange(org.slug)}
                   className="gap-2 p-2"
                 >
                   <div className="flex size-6 items-center justify-center rounded-md border bg-sidebar-primary text-sidebar-primary-foreground">

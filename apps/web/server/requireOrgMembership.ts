@@ -10,27 +10,33 @@ interface RedirectOptions {
 }
 
 /**
- * Verifies the current user is authenticated and is a member of the given org.
- * Redirects on failure; returns session + membership (role + org name) on success.
+ * Verifies the current user is authenticated and is a member of the org
+ * identified by its URL slug. Redirects on failure; returns session +
+ * membership on success.
  */
 export async function requireOrgMembership(
-  orgId: string,
+  orgSlug: string,
   redirects?: RedirectOptions,
 ) {
   const session = await auth();
   if (!session) redirect(redirects?.unauthenticated ?? "/login");
 
-  const membership = await db.member.findUnique({
+  // Single JOIN query — Prisma uses Organization.slug unique index +
+  // Member.userId index in one round trip.
+  const member = await db.member.findFirst({
     where: {
-      userId_organizationId: { userId: session.user.id, organizationId: orgId },
+      userId: session.user.id,
+      organization: { slug: orgSlug },
     },
     select: {
       role: true,
-      organization: { select: { name: true } },
+      organization: { select: { id: true, name: true, slug: true } },
     },
   });
+  if (!member) redirect(redirects?.notMember ?? "/dashboard");
 
-  if (!membership) redirect(redirects?.notMember ?? "/dashboard");
-
-  return { session, membership };
+  return {
+    session,
+    membership: { role: member.role, organization: member.organization },
+  };
 }

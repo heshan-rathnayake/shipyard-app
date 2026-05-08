@@ -14,12 +14,13 @@ export const metadata: Metadata = { title: "Members" };
 export default async function MembersPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ orgSlug: string }>;
 }) {
-  const { orgId } = await params;
+  const { orgSlug } = await params;
 
-  const { session, membership } = await requireOrgMembership(orgId);
+  const { session, membership } = await requireOrgMembership(orgSlug);
   const { role: callerRole, organization } = membership;
+  const orgId = organization.id;
   const canManage =
     callerRole === MemberRole.OWNER || callerRole === MemberRole.ADMIN;
 

@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
 interface OrgStore {
-  activeOrgId: string | null;
-  setActiveOrgId: (id: string) => void;
+  activeOrgSlug: string | null;
+  setActiveOrgSlug: (slug: string) => void;
 }
 
 export const useOrgStore = create<OrgStore>((set) => ({
-  activeOrgId: null,
-  setActiveOrgId: (id) => set({ activeOrgId: id }),
+  activeOrgSlug: null,
+  setActiveOrgSlug: (slug) => set({ activeOrgSlug: slug }),
 }));

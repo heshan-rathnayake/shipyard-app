@@ -21,12 +21,12 @@ const globalItems = [
 export function NavMain() {
   const pathname = usePathname();
   const params = useParams();
-  const storeOrgId = useOrgStore((s) => s.activeOrgId);
+  const storeOrgSlug = useOrgStore((s) => s.activeOrgSlug);
 
   // URL param wins when navigating directly to an org page;
   // otherwise fall back to the org selected in the switcher.
-  const urlOrgId = typeof params.orgId === "string" ? params.orgId : null;
-  const orgId = urlOrgId ?? storeOrgId;
+  const urlOrgSlug = typeof params.orgSlug === "string" ? params.orgSlug : null;
+  const orgSlug = urlOrgSlug ?? storeOrgSlug;
 
   return (
     <>
@@ -52,8 +52,8 @@ export function NavMain() {
         </SidebarGroupContent>
       </SidebarGroup>
 
-      {/* Org-scoped nav — only visible when inside /org/[orgId]/... */}
-      {orgId && (
+      {/* Org-scoped nav — only visible when an org is active */}
+      {orgSlug && (
         <SidebarGroup>
           <SidebarGroupLabel>Organization</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -61,10 +61,10 @@ export function NavMain() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === `/org/${orgId}/members`}
+                  isActive={pathname === `/${orgSlug}/members`}
                   tooltip="Members"
                 >
-                  <Link href={`/org/${orgId}/members`}>
+                  <Link href={`/${orgSlug}/members`}>
                     <Users />
                     <span>Members</span>
                   </Link>
@@ -73,10 +73,10 @@ export function NavMain() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === `/org/${orgId}/activity`}
+                  isActive={pathname === `/${orgSlug}/activity`}
                   tooltip="Activity"
                 >
-                  <Link href={`/org/${orgId}/activity`}>
+                  <Link href={`/${orgSlug}/activity`}>
                     <Activity />
                     <span>Activity</span>
                   </Link>

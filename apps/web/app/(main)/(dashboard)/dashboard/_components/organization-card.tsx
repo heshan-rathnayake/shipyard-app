@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { Prisma } from "@shipyard/db";
 import {
   Card,
@@ -97,7 +96,7 @@ export function OrganizationCard({
             size="sm"
             onClick={(e) => {
               e.preventDefault();
-              router.push(`/org/${organization.id}/members`);
+              router.push(`/${organization.slug}/members`);
             }}
           >
             <Users className="size-3.5" />

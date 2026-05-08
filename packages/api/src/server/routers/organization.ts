@@ -65,6 +65,18 @@ export const organizationRouter = router({
         });
       }
 
+      // These slugs conflict with top-level Next.js routes
+      const RESERVED_SLUGS = new Set([
+        "dashboard", "settings", "login", "signup", "register",
+        "invite", "api", "org", "admin", "auth",
+      ]);
+      if (RESERVED_SLUGS.has(baseSlug)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `"${baseSlug}" is a reserved name. Please choose a different organization name.`,
+        });
+      }
+
       // Append a short random suffix only when the base slug is already taken
       const existing = await ctx.db.organization.findUnique({
         where: { slug: baseSlug },

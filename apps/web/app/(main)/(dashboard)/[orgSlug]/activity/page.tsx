@@ -15,14 +15,16 @@ const PAGE_SIZE = 50;
 export default async function ActivityPage({
   params,
 }: {
-  params: Promise<{ orgId: string }>;
+  params: Promise<{ orgSlug: string }>;
 }) {
-  const { orgId } = await params;
+  const { orgSlug } = await params;
 
-  const { membership } = await requireOrgMembership(orgId);
+  const { membership } = await requireOrgMembership(orgSlug);
   const { role, organization } = membership;
+  const orgId = organization.id;
+
   if (role !== MemberRole.OWNER && role !== MemberRole.ADMIN) {
-    redirect(`/org/${orgId}/members`);
+    redirect(`/${orgSlug}/members`);
   }
 
   // Fetch first page (+1 to detect if there are more)
