@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { MemberRole, ProjectStatus } from "@shipyard/db/enum";
 import { router, protectedProcedure } from "../trpc";
 import { PROJECT_LIMITS } from "../../config/plans";
 import { requireMembership, requireManagerRole } from "../../lib/membership";
@@ -16,7 +15,7 @@ export const projectRouter = router({
       return ctx.db.project.findMany({
         where: {
           organizationId: input.orgId,
-          status: { not: ProjectStatus.ARCHIVED },
+          status: { not: "ARCHIVED" },
         },
         select: {
           id: true,
@@ -39,7 +38,11 @@ export const projectRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
       requireManagerRole(caller.role);
 
       const org = await ctx.db.organization.findUnique({
@@ -51,7 +54,10 @@ export const projectRouter = router({
       const limit = PROJECT_LIMITS[org.subscriptionTier];
       if (limit !== Infinity) {
         const activeCount = await ctx.db.project.count({
-          where: { organizationId: input.orgId, status: { not: ProjectStatus.ARCHIVED } },
+          where: {
+            organizationId: input.orgId,
+            status: { not: "ARCHIVED" },
+          },
         });
         if (activeCount >= limit) {
           throw new TRPCError({
@@ -100,7 +106,11 @@ export const projectRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
       requireManagerRole(caller.role);
       await assertProjectBelongsToOrg(ctx.db, input.projectId, input.orgId);
 
@@ -108,7 +118,9 @@ export const projectRouter = router({
         where: { id: input.projectId },
         data: {
           ...(input.name !== undefined ? { name: input.name } : {}),
-          ...(input.description !== undefined ? { description: input.description } : {}),
+          ...(input.description !== undefined
+            ? { description: input.description }
+            : {}),
         },
         select: { id: true, name: true, description: true },
       });
@@ -129,13 +141,17 @@ export const projectRouter = router({
   archive: protectedProcedure
     .input(z.object({ projectId: z.string(), orgId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
       requireManagerRole(caller.role);
       await assertProjectBelongsToOrg(ctx.db, input.projectId, input.orgId);
 
       const project = await ctx.db.project.update({
         where: { id: input.projectId },
-        data: { status: ProjectStatus.ARCHIVED },
+        data: { status: "ARCHIVED" },
         select: { id: true, name: true },
       });
 
@@ -155,8 +171,12 @@ export const projectRouter = router({
   delete: protectedProcedure
     .input(z.object({ projectId: z.string(), orgId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
-      if (caller.role !== MemberRole.OWNER) {
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
+      if (caller.role !== "OWNER") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only owners can delete projects.",
@@ -178,4 +198,3 @@ export const projectRouter = router({
       return { success: true };
     }),
 });
-

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { TaskStatus, Priority } from "@shipyard/db/enum";
 import { router, protectedProcedure } from "../trpc";
 import { requireMembership, requireManagerRole } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
@@ -8,19 +7,9 @@ import {
   assertTaskBelongsToOrg,
 } from "../../lib/projectGuards";
 
-const taskStatusSchema = z.enum([
-  TaskStatus.TODO,
-  TaskStatus.IN_PROGRESS,
-  TaskStatus.DONE,
-  TaskStatus.CANCELLED,
-]);
+const taskStatusSchema = z.enum(["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]);
 
-const prioritySchema = z.enum([
-  Priority.LOW,
-  Priority.MEDIUM,
-  Priority.HIGH,
-  Priority.URGENT,
-]);
+const prioritySchema = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
 
 // Shared select for returning a full task with assignee
 const taskSelect = {
@@ -61,14 +50,18 @@ export const taskRouter = router({
         orgId: z.string(),
         title: z.string().min(1, "Title is required").max(255),
         description: z.string().optional(),
-        status: taskStatusSchema.default(TaskStatus.TODO),
-        priority: prioritySchema.default(Priority.MEDIUM),
+        status: taskStatusSchema.default("TODO"),
+        priority: prioritySchema.default("MEDIUM"),
         assigneeId: z.string().optional(),
         dueDate: z.string().datetime().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
       await assertProjectBelongsToOrg(ctx.db, input.projectId, input.orgId);
 
       // Place at end of the target column
@@ -119,16 +112,28 @@ export const taskRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
-      const existing = await assertTaskBelongsToOrg(ctx.db, input.taskId, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
+      const existing = await assertTaskBelongsToOrg(
+        ctx.db,
+        input.taskId,
+        input.orgId,
+      );
 
       const updated = await ctx.db.task.update({
         where: { id: input.taskId },
         data: {
           ...(input.title !== undefined ? { title: input.title } : {}),
-          ...(input.description !== undefined ? { description: input.description } : {}),
+          ...(input.description !== undefined
+            ? { description: input.description }
+            : {}),
           ...(input.priority !== undefined ? { priority: input.priority } : {}),
-          ...(input.assigneeId !== undefined ? { assigneeId: input.assigneeId } : {}),
+          ...(input.assigneeId !== undefined
+            ? { assigneeId: input.assigneeId }
+            : {}),
           ...(input.dueDate !== undefined
             ? { dueDate: input.dueDate ? new Date(input.dueDate) : null }
             : {}),
@@ -138,7 +143,8 @@ export const taskRouter = router({
 
       // Separate audit entry when the assignee changes
       const action =
-        input.assigneeId !== undefined && input.assigneeId !== existing.assigneeId
+        input.assigneeId !== undefined &&
+        input.assigneeId !== existing.assigneeId
           ? ActivityAction.TASK_ASSIGNED
           : ActivityAction.TASK_UPDATED;
 
@@ -164,8 +170,16 @@ export const taskRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
-      const existing = await assertTaskBelongsToOrg(ctx.db, input.taskId, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
+      const existing = await assertTaskBelongsToOrg(
+        ctx.db,
+        input.taskId,
+        input.orgId,
+      );
 
       // Place at end of the target column
       const last = await ctx.db.task.findFirst({
@@ -192,7 +206,11 @@ export const taskRouter = router({
         action: ActivityAction.TASK_STATUS_UPDATED,
         entityType: EntityType.TASK,
         entityId: input.taskId,
-        metadata: { title: existing.title, from: existing.status, to: input.status },
+        metadata: {
+          title: existing.title,
+          from: existing.status,
+          to: input.status,
+        },
       });
 
       return updated;
@@ -225,9 +243,17 @@ export const taskRouter = router({
   delete: protectedProcedure
     .input(z.object({ taskId: z.string(), orgId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
       requireManagerRole(caller.role);
-      const existing = await assertTaskBelongsToOrg(ctx.db, input.taskId, input.orgId);
+      const existing = await assertTaskBelongsToOrg(
+        ctx.db,
+        input.taskId,
+        input.orgId,
+      );
 
       void logActivity({
         db: ctx.db,

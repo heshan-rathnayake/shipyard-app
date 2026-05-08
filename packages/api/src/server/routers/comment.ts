@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { MemberRole } from "@shipyard/db/enum";
 import { router, protectedProcedure } from "../trpc";
 import { requireMembership } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
@@ -40,7 +39,11 @@ export const commentRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
       await assertTaskBelongsToOrg(ctx.db, input.taskId, input.orgId);
 
       const comment = await ctx.db.comment.create({
@@ -79,7 +82,11 @@ export const commentRouter = router({
   delete: protectedProcedure
     .input(z.object({ commentId: z.string(), orgId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const caller = await requireMembership(ctx.db, ctx.session.user.id, input.orgId);
+      const caller = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
 
       const comment = await ctx.db.comment.findUnique({
         where: { id: input.commentId },
@@ -90,13 +97,15 @@ export const commentRouter = router({
       });
 
       if (!comment || comment.task.project.organizationId !== input.orgId) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Comment not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Comment not found.",
+        });
       }
 
       // Only the comment author, or an OWNER/ADMIN, can delete
       const isAuthor = comment.authorId === caller.id;
-      const isManager =
-        caller.role === MemberRole.OWNER || caller.role === MemberRole.ADMIN;
+      const isManager = caller.role === "OWNER" || caller.role === "ADMIN";
 
       if (!isAuthor && !isManager) {
         throw new TRPCError({

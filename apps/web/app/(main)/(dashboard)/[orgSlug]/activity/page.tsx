@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { db } from "@shipyard/db";
-import { MemberRole } from "@shipyard/db/enum";
 import { Separator } from "@shipyard/ui/components/separator";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
 import { ActivityLogTable } from "./_components/activity-log-table";
@@ -23,7 +22,7 @@ export default async function ActivityPage({
   const { role, organization } = membership;
   const orgId = organization.id;
 
-  if (role !== MemberRole.OWNER && role !== MemberRole.ADMIN) {
+  if (role !== "OWNER" && role !== "ADMIN") {
     redirect(`/${orgSlug}/members`);
   }
 

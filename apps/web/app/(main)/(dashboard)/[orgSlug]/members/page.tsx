@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { db } from "@shipyard/db";
-import { MemberRole } from "@shipyard/db/enum";
 import { Separator } from "@shipyard/ui/components/separator";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
 import { InviteMemberDialog } from "./_components/invite-member-dialog";
@@ -21,8 +20,7 @@ export default async function MembersPage({
   const { session, membership } = await requireOrgMembership(orgSlug);
   const { role: callerRole, organization } = membership;
   const orgId = organization.id;
-  const canManage =
-    callerRole === MemberRole.OWNER || callerRole === MemberRole.ADMIN;
+  const canManage = callerRole === "OWNER" || callerRole === "ADMIN";
 
   // Fetch members and pending invitations in parallel
   const [members, invitations] = await Promise.all([

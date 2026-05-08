@@ -5,7 +5,7 @@ import { router, protectedProcedure } from "../trpc";
 import { MEMBER_LIMITS } from "../../config/plans";
 import { requireMembership, requireManagerRole } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
-import { MemberRole } from "@shipyard/db/enum";
+import type { MemberRole } from "@shipyard/db/enum";
 
 // ─── router ─────────────────────────────────────────────────────────────────
 
@@ -45,13 +45,13 @@ export const memberRouter = router({
         select: { role: true, userId: true },
       });
       if (!target)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Member not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Member not found.",
+        });
 
       // OWNER cannot remove themselves (would leave org ownerless)
-      if (
-        target.userId === ctx.session.user.id &&
-        target.role === MemberRole.OWNER
-      ) {
+      if (target.userId === ctx.session.user.id && target.role === "OWNER") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You cannot remove yourself as the owner.",
@@ -59,8 +59,8 @@ export const memberRouter = router({
       }
       // ADMIN cannot remove other ADMINs or OWNERs
       if (
-        caller.role === MemberRole.ADMIN &&
-        (target.role === MemberRole.OWNER || target.role === MemberRole.ADMIN)
+        caller.role === "ADMIN" &&
+        (target.role === "OWNER" || target.role === "ADMIN")
       ) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -89,7 +89,7 @@ export const memberRouter = router({
       z.object({
         orgId: z.string(),
         memberId: z.string(),
-        role: z.enum(MemberRole),
+        role: z.enum(["OWNER", "ADMIN", "MEMBER", "VIEWER"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -98,7 +98,7 @@ export const memberRouter = router({
         ctx.session.user.id,
         input.orgId,
       );
-      if (caller.role !== MemberRole.OWNER) {
+      if (caller.role !== "OWNER") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only owners can change member roles.",
@@ -110,12 +110,15 @@ export const memberRouter = router({
         select: { role: true, userId: true },
       });
       if (!target)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Member not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Member not found.",
+        });
 
       // Prevent demoting the last owner
-      if (target.role === MemberRole.OWNER && input.role !== MemberRole.OWNER) {
+      if (target.role === "OWNER" && input.role !== "OWNER") {
         const ownerCount = await ctx.db.member.count({
-          where: { organizationId: input.orgId, role: MemberRole.OWNER },
+          where: { organizationId: input.orgId, role: "OWNER" },
         });
         if (ownerCount <= 1) {
           throw new TRPCError({
@@ -187,7 +190,7 @@ export const memberRouter = router({
       z.object({
         orgId: z.string(),
         email: z.email("Invalid email address"),
-        role: z.enum(MemberRole),
+        role: z.enum(["OWNER", "ADMIN", "MEMBER", "VIEWER"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -200,8 +203,8 @@ export const memberRouter = router({
 
       // ADMIN can only assign MEMBER or VIEWER
       if (
-        caller.role === MemberRole.ADMIN &&
-        !(input.role === MemberRole.MEMBER || input.role === MemberRole.VIEWER)
+        caller.role === "ADMIN" &&
+        !(input.role === "MEMBER" || input.role === "VIEWER")
       ) {
         throw new TRPCError({
           code: "FORBIDDEN",

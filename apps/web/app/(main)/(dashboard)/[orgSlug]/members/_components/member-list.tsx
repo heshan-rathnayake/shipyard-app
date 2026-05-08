@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@shipyard/ui/components/dropdown-menu";
 import { userInitials } from "@/lib/userInitials";
-import { MemberRole } from "@shipyard/db/enum";
+import type { MemberRole } from "@shipyard/db/enum";
 
 interface Member {
   id: string;
@@ -62,8 +62,7 @@ export function MemberList({
     onSuccess: () => router.refresh(),
   });
 
-  const canManage =
-    callerRole === MemberRole.OWNER || callerRole === MemberRole.ADMIN;
+  const canManage = callerRole === "OWNER" || callerRole === "ADMIN";
 
   return (
     <div className="divide-y divide-border rounded-lg border">
@@ -71,13 +70,12 @@ export function MemberList({
         const isSelf = m.user.id === currentUserId;
         const canRemove =
           canManage &&
-          !(isSelf && m.role === MemberRole.OWNER) &&
+          !(isSelf && m.role === "OWNER") &&
           !(
-            callerRole === MemberRole.ADMIN &&
-            (m.role === MemberRole.OWNER || m.role === MemberRole.ADMIN)
+            callerRole === "ADMIN" &&
+            (m.role === "OWNER" || m.role === "ADMIN")
           );
-        const canChangeRole =
-          callerRole === MemberRole.OWNER && m.role !== MemberRole.OWNER;
+        const canChangeRole = callerRole === "OWNER" && m.role !== "OWNER";
 
         return (
           <div key={m.id} className="flex items-center gap-3 px-4 py-3">

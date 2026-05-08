@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import type { PrismaClient } from "@shipyard/db";
-import { MemberRole } from "@shipyard/db/enum";
+import type { MemberRole } from "@shipyard/db/enum";
 
 /** Assert caller is a member of the org and return their membership. */
 export async function requireMembership(
@@ -23,7 +23,7 @@ export async function requireMembership(
 
 /** Assert caller is OWNER or ADMIN. */
 export function requireManagerRole(role: MemberRole) {
-  if (role !== MemberRole.OWNER && role !== MemberRole.ADMIN) {
+  if (role !== "OWNER" && role !== "ADMIN") {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Only owners and admins can perform this action.",

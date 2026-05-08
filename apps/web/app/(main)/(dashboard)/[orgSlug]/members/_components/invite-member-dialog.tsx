@@ -23,13 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shipyard/ui/components/select";
-import { MemberRole } from "@shipyard/db/enum";
+import type { MemberRole } from "@shipyard/db/enum";
 
 const ALL_ROLES: { value: MemberRole; label: string }[] = [
-  { value: MemberRole.OWNER, label: "Owner" },
-  { value: MemberRole.ADMIN, label: "Admin" },
-  { value: MemberRole.MEMBER, label: "Member" },
-  { value: MemberRole.VIEWER, label: "Viewer" },
+  { value: "OWNER", label: "Owner" },
+  { value: "ADMIN", label: "Admin" },
+  { value: "MEMBER", label: "Member" },
+  { value: "VIEWER", label: "Viewer" },
 ];
 
 interface InviteMemberDialogProps {
@@ -43,14 +43,14 @@ export function InviteMemberDialog({
 }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<MemberRole>(MemberRole.MEMBER);
+  const [role, setRole] = useState<"OWNER" | "ADMIN" | "MEMBER" | "VIEWER">(
+    "MEMBER",
+  );
 
   const assignableRoles =
-    callerRole === MemberRole.OWNER
+    callerRole === "OWNER"
       ? ALL_ROLES
-      : ALL_ROLES.filter(
-          (r) => r.value === MemberRole.MEMBER || r.value === MemberRole.VIEWER,
-        );
+      : ALL_ROLES.filter((r) => r.value === "MEMBER" || r.value === "VIEWER");
 
   const router = useRouter();
 
@@ -58,7 +58,7 @@ export function InviteMemberDialog({
     onSuccess: () => {
       setOpen(false);
       setEmail("");
-      setRole(MemberRole.MEMBER);
+      setRole("MEMBER");
       router.refresh();
     },
   });
