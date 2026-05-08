@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { auth } from "@/server/auth";
 import { db } from "@shipyard/db";
 import { MemberRole } from "@shipyard/db/enum";
 import { Separator } from "@shipyard/ui/components/separator";
+import { requireOrgMembership } from "@/server/requireOrgMembership";
 import { InviteMemberDialog } from "./_components/invite-member-dialog";
 import { MemberList } from "./_components/member-list";
 import { PendingInvitations } from "./_components/pending-invitations";
@@ -19,23 +18,8 @@ export default async function MembersPage({
 }) {
   const { orgId } = await params;
 
-  const session = await auth();
-  if (!session) redirect("/login");
-
-  // Verify caller is a member and get their role
-  const callerMembership = await db.member.findUnique({
-    where: {
-      userId_organizationId: { userId: session.user.id, organizationId: orgId },
-    },
-    select: {
-      role: true,
-      organization: { select: { name: true } },
-    },
-  });
-
-  if (!callerMembership) redirect("/dashboard");
-
-  const { role: callerRole, organization } = callerMembership;
+  const { session, membership } = await requireOrgMembership(orgId);
+  const { role: callerRole, organization } = membership;
   const canManage =
     callerRole === MemberRole.OWNER || callerRole === MemberRole.ADMIN;
 
