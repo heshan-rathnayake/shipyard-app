@@ -3,43 +3,13 @@ import { TRPCError } from "@trpc/server";
 import { sendEmail } from "@shipyard/email";
 import { router, protectedProcedure } from "../trpc";
 import { MEMBER_LIMITS } from "../../config/plans";
-import type { PrismaClient } from "@shipyard/db";
+import { requireMembership, requireManagerRole } from "../../lib/membership";
+import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
 import { MemberRole } from "@shipyard/db/enum";
 
-// ─── helpers ────────────────────────────────────────────────────────────────
+// ─── router ─────────────────────────────────────────────────────────────────
 
 const INVITE_EXPIRY_DAYS = 7;
-
-/** Assert caller is a member of the org and return their membership. */
-async function requireMembership(
-  db: PrismaClient,
-  userId: string,
-  orgId: string,
-) {
-  const membership = await db.member.findUnique({
-    where: { userId_organizationId: { userId, organizationId: orgId } },
-    select: { role: true },
-  });
-  if (!membership) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "You are not a member of this organization.",
-    });
-  }
-  return membership;
-}
-
-/** Assert caller is OWNER or ADMIN. */
-function requireManagerRole(role: MemberRole) {
-  if (role !== MemberRole.OWNER && role !== MemberRole.ADMIN) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Only owners and admins can perform this action.",
-    });
-  }
-}
-
-// ─── router ─────────────────────────────────────────────────────────────────
 
 export const memberRouter = router({
   /** List all members of an org with user details. */
@@ -75,10 +45,7 @@ export const memberRouter = router({
         select: { role: true, userId: true },
       });
       if (!target)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Member not found.",
-        });
+        throw new TRPCError({ code: "NOT_FOUND", message: "Member not found." });
 
       // OWNER cannot remove themselves (would leave org ownerless)
       if (
@@ -102,6 +69,17 @@ export const memberRouter = router({
       }
 
       await ctx.db.member.delete({ where: { id: input.memberId } });
+
+      void logActivity({
+        db: ctx.db,
+        orgId: input.orgId,
+        memberId: caller.id,
+        action: ActivityAction.MEMBER_REMOVED,
+        entityType: EntityType.MEMBER,
+        entityId: input.memberId,
+        metadata: { removedUserId: target.userId, role: target.role },
+      });
+
       return { success: true };
     }),
 
@@ -132,10 +110,7 @@ export const memberRouter = router({
         select: { role: true, userId: true },
       });
       if (!target)
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Member not found.",
-        });
+        throw new TRPCError({ code: "NOT_FOUND", message: "Member not found." });
 
       // Prevent demoting the last owner
       if (target.role === MemberRole.OWNER && input.role !== MemberRole.OWNER) {
@@ -150,11 +125,23 @@ export const memberRouter = router({
         }
       }
 
-      return ctx.db.member.update({
+      const updated = await ctx.db.member.update({
         where: { id: input.memberId },
         data: { role: input.role },
         select: { id: true, role: true },
       });
+
+      void logActivity({
+        db: ctx.db,
+        orgId: input.orgId,
+        memberId: caller.id,
+        action: ActivityAction.MEMBER_ROLE_UPDATED,
+        entityType: EntityType.MEMBER,
+        entityId: input.memberId,
+        metadata: { previousRole: target.role, newRole: input.role },
+      });
+
+      return updated;
     }),
 
   /** Cancel a pending invitation. */
@@ -168,9 +155,29 @@ export const memberRouter = router({
       );
       requireManagerRole(caller.role);
 
-      await ctx.db.invitation.delete({
+      // Fetch first so we have metadata and confirm it belongs to this org
+      const invitation = await ctx.db.invitation.findUnique({
         where: { id: input.invitationId, organizationId: input.orgId },
+        select: { email: true, role: true },
       });
+      if (!invitation)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invitation not found.",
+        });
+
+      await ctx.db.invitation.delete({ where: { id: input.invitationId } });
+
+      void logActivity({
+        db: ctx.db,
+        orgId: input.orgId,
+        memberId: caller.id,
+        action: ActivityAction.INVITATION_CANCELLED,
+        entityType: EntityType.INVITATION,
+        entityId: input.invitationId,
+        metadata: { email: invitation.email, role: invitation.role },
+      });
+
       return { success: true };
     }),
 
@@ -275,7 +282,7 @@ export const memberRouter = router({
           expiresAt,
           invitedById: ctx.session.user.id,
         },
-        select: { token: true },
+        select: { token: true, id: true },
       });
 
       const inviterName =
@@ -294,6 +301,16 @@ export const memberRouter = router({
           inviteUrl,
           expiryDays: INVITE_EXPIRY_DAYS,
         }),
+      });
+
+      void logActivity({
+        db: ctx.db,
+        orgId: input.orgId,
+        memberId: caller.id,
+        action: ActivityAction.MEMBER_INVITED,
+        entityType: EntityType.INVITATION,
+        entityId: invitation.id,
+        metadata: { email: input.email, role: input.role },
       });
 
       return { success: true };
@@ -327,6 +344,7 @@ export const memberRouter = router({
         });
       }
 
+      // Decliner has no member record in this org — skip audit log
       await ctx.db.invitation.delete({ where: { id: invitation.id } });
       return { success: true };
     }),
@@ -386,6 +404,28 @@ export const memberRouter = router({
           data: { acceptedAt: new Date() },
         }),
       ]);
+
+      // Look up new member id for the audit log
+      const newMember = await ctx.db.member.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: ctx.session.user.id,
+            organizationId: invitation.organizationId,
+          },
+        },
+        select: { id: true },
+      });
+      if (newMember) {
+        void logActivity({
+          db: ctx.db,
+          orgId: invitation.organizationId,
+          memberId: newMember.id,
+          action: ActivityAction.INVITATION_ACCEPTED,
+          entityType: EntityType.INVITATION,
+          entityId: invitation.id,
+          metadata: { role: invitation.role },
+        });
+      }
 
       return { orgId: invitation.organizationId };
     }),

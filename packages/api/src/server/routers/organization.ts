@@ -2,6 +2,8 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import { ORG_OWNER_LIMITS } from "../../config/plans";
+import { requireMembership } from "../../lib/membership";
+import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
 
 // Converts a display name to a URL-safe slug
 function toSlug(name: string): string {
@@ -73,7 +75,7 @@ export const organizationRouter = router({
         ? `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`
         : baseSlug;
 
-      return ctx.db.organization.create({
+      const org = await ctx.db.organization.create({
         data: {
           name: input.name,
           slug,
@@ -90,27 +92,49 @@ export const organizationRouter = router({
           slug: true,
         },
       });
+
+      // Look up the new member record for the audit log
+      const callerMember = await ctx.db.member.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: ctx.session.user.id,
+            organizationId: org.id,
+          },
+        },
+        select: { id: true },
+      });
+      if (callerMember) {
+        void logActivity({
+          db: ctx.db,
+          orgId: org.id,
+          memberId: callerMember.id,
+          action: ActivityAction.ORG_CREATED,
+          entityType: EntityType.ORGANIZATION,
+          entityId: org.id,
+          metadata: { name: input.name },
+        });
+      }
+
+      return org;
     }),
 
   delete: protectedProcedure
     .input(z.object({ orgId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Only owners can delete the organization
-      const membership = await ctx.db.member.findFirst({
-        where: {
-          userId: ctx.session.user.id,
-          organizationId: input.orgId,
-        },
-        select: { role: true },
-      });
+      const membership = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId,
+      );
 
-      if (!membership || membership.role !== "OWNER") {
+      if (membership.role !== "OWNER") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only organization owners can delete the organization.",
         });
       }
 
+      // No audit log — cascade delete removes all ActivityLog rows anyway
       await ctx.db.organization.delete({
         where: { id: input.orgId },
       });
