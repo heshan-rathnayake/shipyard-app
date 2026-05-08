@@ -58,6 +58,14 @@ export const activityLogRouter = router({
       const items = hasMore ? logs.slice(0, input.limit) : logs;
       const nextCursor = hasMore ? (items[items.length - 1]?.id ?? null) : null;
 
-      return { items, nextCursor };
+      // Cast metadata to unknown to break Prisma's recursive JsonValue type,
+      // which causes "type instantiation excessively deep" in tRPC's useQuery generics.
+      return {
+        items: items.map((log) => ({
+          ...log,
+          metadata: log.metadata as unknown,
+        })),
+        nextCursor,
+      };
     }),
 });
