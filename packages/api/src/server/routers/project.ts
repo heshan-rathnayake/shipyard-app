@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
+import { logger } from "@shipyard/logger";
 import { PROJECT_LIMITS } from "../../config/plans";
 import { requireMembership, requireManagerRole } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
@@ -60,6 +61,12 @@ export const projectRouter = router({
           },
         });
         if (activeCount >= limit) {
+          logger.warn("Project limit reached", {
+            orgId: input.orgId,
+            tier: org.subscriptionTier,
+            activeCount,
+            limit,
+          });
           throw new TRPCError({
             code: "FORBIDDEN",
             message: `Free plan is limited to ${limit} active project. Upgrade to Pro to create more.`,

@@ -1,4 +1,5 @@
 import type { PrismaClient, Prisma } from "@shipyard/db";
+import { logger } from "@shipyard/logger";
 import { ActivityAction, EntityType } from "../config/activityLog";
 
 export { ActivityAction, EntityType };
@@ -40,6 +41,6 @@ export async function logActivity({
       },
     });
   } catch (err) {
-    console.error("[activityLog] Failed to write audit log:", err);
+    logger.error("Failed to write audit log", { err });
   }
 }

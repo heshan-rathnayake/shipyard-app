@@ -1,4 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
+import { logger } from "@shipyard/logger";
 import type { Context } from "./context";
 import type { Session } from "next-auth";
 
@@ -12,7 +13,17 @@ type ProtectedContext = Omit<Context, "session"> & {
   };
 };
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+  errorFormatter({ shape, error }) {
+    if (error.code === "INTERNAL_SERVER_ERROR") {
+      logger.error("Unhandled tRPC error", {
+        code: error.code,
+        message: error.message,
+      });
+    }
+    return shape;
+  },
+});
 
 export const router = t.router;
 export const publicProcedure = t.procedure;

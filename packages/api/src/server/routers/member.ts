@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { sendEmail } from "@shipyard/email";
 import { router, protectedProcedure } from "../trpc";
+import { logger } from "@shipyard/logger";
 import { MEMBER_LIMITS } from "../../config/plans";
 import { requireMembership, requireManagerRole } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
@@ -231,6 +232,12 @@ export const memberRouter = router({
 
       const limit = MEMBER_LIMITS[org.subscriptionTier];
       if (memberCount + pendingCount >= limit) {
+        logger.warn("Member seat limit reached", {
+          orgId: input.orgId,
+          tier: org.subscriptionTier,
+          count: memberCount + pendingCount,
+          limit,
+        });
         throw new TRPCError({
           code: "FORBIDDEN",
           message: `${org.subscriptionTier === "FREE" ? "Free" : "Pro"} plan is limited to ${limit} members. Upgrade to add more.`,
