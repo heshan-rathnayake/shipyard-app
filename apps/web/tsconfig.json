@@ -9,6 +9,7 @@
       "@shipyard/ui": ["../../packages/ui/src"],
       "@shipyard/ui/*": ["../../packages/ui/src/*"],
       "@shipyard/api": ["../../packages/api/src"],
+      "@shipyard/api/lib": ["../../packages/api/src/lib"],
       "@shipyard/email": ["../../packages/email"],
       "@shipyard/db": ["../../packages/db/src"],
       "@shipyard/db/enum": ["../../packages/db/src/enum"]
