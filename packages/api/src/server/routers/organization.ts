@@ -1,18 +1,11 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
+import { logger } from "@shipyard/logger";
 import { ORG_OWNER_LIMITS } from "../../config/plans";
 import { requireMembership } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
-
-// Converts a display name to a URL-safe slug
-function toSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+import { toSlug } from "../../lib/slug";
 
 export const organizationRouter = router({
   getMyOrgs: protectedProcedure.query(async ({ ctx }) => {
@@ -49,6 +42,11 @@ export const organizationRouter = router({
       });
 
       if (ownedCount >= ORG_OWNER_LIMITS.FREE) {
+        logger.warn("Org ownership limit reached", {
+          userId: ctx.session.user.id,
+          ownedCount,
+          limit: ORG_OWNER_LIMITS.FREE,
+        });
         throw new TRPCError({
           code: "FORBIDDEN",
           message:
@@ -67,8 +65,16 @@ export const organizationRouter = router({
 
       // These slugs conflict with top-level Next.js routes
       const RESERVED_SLUGS = new Set([
-        "dashboard", "settings", "login", "signup", "register",
-        "invite", "api", "org", "admin", "auth",
+        "dashboard",
+        "settings",
+        "login",
+        "signup",
+        "register",
+        "invite",
+        "api",
+        "org",
+        "admin",
+        "auth",
       ]);
       if (RESERVED_SLUGS.has(baseSlug)) {
         throw new TRPCError({

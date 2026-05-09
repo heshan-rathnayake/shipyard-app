@@ -1,4 +1,4 @@
-export function toSlugPreview(name: string): string {
+export function toSlug(name: string): string {
   return name
     .toLowerCase()
     .trim()

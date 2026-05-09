@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@shipyard/ui/components/dialog";
-import { toSlugPreview } from "@/lib/toSlugPreview";
+import { toSlug } from "@shipyard/api/lib/slug";
 
 interface CreateOrgDialogProps {
   open?: boolean;
@@ -53,7 +53,7 @@ export function CreateOrgDialog({
     },
   });
 
-  const slugPreview = toSlugPreview(name);
+  const slugPreview = toSlug(name);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -64,7 +64,11 @@ export function CreateOrgDialog({
             variant="outline"
             size="sm"
             disabled={atLimit}
-            title={atLimit ? "Free plan is limited to 1 organization. Upgrade to Pro." : undefined}
+            title={
+              atLimit
+                ? "Free plan is limited to 1 organization. Upgrade to Pro."
+                : undefined
+            }
           >
             <Plus className="size-4" />
             New organization
