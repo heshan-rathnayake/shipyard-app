@@ -7,6 +7,7 @@ import { requireOrgMembership } from "@/server/requireOrgMembership";
 import { InviteMemberDialog } from "./_components/invite-member-dialog";
 import { MemberList } from "./_components/member-list";
 import { PendingInvitations } from "./_components/pending-invitations";
+import { MEMBER_LIMITS } from "@shipyard/api/config/plans";
 
 export const metadata: Metadata = { title: "Members" };
 
@@ -54,6 +55,9 @@ export default async function MembersPage({
       : Promise.resolve([]),
   ]);
 
+  const memberLimitReached =
+    canManage && members.length >= MEMBER_LIMITS[organization.subscriptionTier];
+
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Back link */}
@@ -72,7 +76,11 @@ export default async function MembersPage({
           <p className="text-sm text-muted-foreground">{organization.name}</p>
         </div>
         {canManage && (
-          <InviteMemberDialog orgId={orgId} callerRole={callerRole} />
+          <InviteMemberDialog
+            orgId={orgId}
+            callerRole={callerRole}
+            memberLimitReached={memberLimitReached}
+          />
         )}
       </div>
 

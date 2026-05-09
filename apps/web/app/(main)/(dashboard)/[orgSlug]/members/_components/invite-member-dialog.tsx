@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus } from "lucide-react";
+import { Lock, UserPlus } from "lucide-react";
 import { trpc } from "@/src/trpc/react";
 import { Button } from "@shipyard/ui/components/button";
 import { Input } from "@shipyard/ui/components/input";
@@ -35,11 +35,13 @@ const ALL_ROLES: { value: MemberRole; label: string }[] = [
 interface InviteMemberDialogProps {
   orgId: string;
   callerRole: MemberRole;
+  memberLimitReached: boolean;
 }
 
 export function InviteMemberDialog({
   orgId,
   callerRole,
+  memberLimitReached,
 }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -65,6 +67,8 @@ export function InviteMemberDialog({
   });
 
   function handleSubmit() {
+    if (memberLimitReached) return;
+
     const trimmed = email.trim();
     if (trimmed) invite.mutate({ orgId, email: trimmed, role });
   }
@@ -72,12 +76,30 @@ export function InviteMemberDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {canInvite && (
-        <DialogTrigger asChild>
-          <Button size="sm">
-            <UserPlus className="size-4" />
-            Invite member
-          </Button>
-        </DialogTrigger>
+        <span
+          title={
+            memberLimitReached
+              ? "You have reached the member limit. Upgrade to Pro to invite more members."
+              : undefined
+          }
+          className="inline-flex"
+        >
+          <DialogTrigger asChild>
+            <Button size="sm" disabled={memberLimitReached}>
+              {!memberLimitReached ? (
+                <>
+                  <UserPlus className="size-4" />
+                  Invite member
+                </>
+              ) : (
+                <>
+                  <Lock className="size-4" />
+                  Upgrade to Pro
+                </>
+              )}
+            </Button>
+          </DialogTrigger>
+        </span>
       )}
 
       <DialogContent className="sm:max-w-md">
@@ -133,7 +155,7 @@ export function InviteMemberDialog({
             Cancel
           </Button>
           <Button
-            disabled={!email.trim() || invite.isPending}
+            disabled={!email.trim() || invite.isPending || memberLimitReached}
             onClick={handleSubmit}
           >
             {invite.isPending ? "Sending…" : "Send invite"}
