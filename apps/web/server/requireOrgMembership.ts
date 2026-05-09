@@ -29,6 +29,7 @@ export async function requireOrgMembership(
       organization: { slug: orgSlug },
     },
     select: {
+      id: true,
       role: true,
       organization: { select: { id: true, name: true, slug: true } },
     },
@@ -37,6 +38,6 @@ export async function requireOrgMembership(
 
   return {
     session,
-    membership: { role: member.role, organization: member.organization },
+    membership: { id: member.id, role: member.role, organization: member.organization },
   };
 }
