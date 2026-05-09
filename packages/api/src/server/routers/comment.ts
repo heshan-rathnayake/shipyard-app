@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
-import { requireMembership } from "../../lib/membership";
+import { requireMembership, requireContributorRole } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
 import { assertTaskBelongsToOrg } from "../../lib/projectGuards";
 
@@ -44,6 +44,7 @@ export const commentRouter = router({
         ctx.session.user.id,
         input.orgId,
       );
+      requireContributorRole(caller.role);
       await assertTaskBelongsToOrg(ctx.db, input.taskId, input.orgId);
 
       const comment = await ctx.db.comment.create({

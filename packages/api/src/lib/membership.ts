@@ -30,3 +30,13 @@ export function requireManagerRole(role: MemberRole) {
     });
   }
 }
+
+/** Assert caller is at least MEMBER (blocks VIEWER). */
+export function requireContributorRole(role: MemberRole) {
+  if (role === "VIEWER") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Viewers cannot perform this action.",
+    });
+  }
+}

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
-import { requireMembership, requireManagerRole } from "../../lib/membership";
+import { requireMembership, requireManagerRole, requireContributorRole } from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
 import {
   assertProjectBelongsToOrg,
@@ -62,6 +62,7 @@ export const taskRouter = router({
         ctx.session.user.id,
         input.orgId,
       );
+      requireContributorRole(caller.role);
       await assertProjectBelongsToOrg(ctx.db, input.projectId, input.orgId);
 
       // Place at end of the target column
@@ -117,6 +118,7 @@ export const taskRouter = router({
         ctx.session.user.id,
         input.orgId,
       );
+      requireContributorRole(caller.role);
       const existing = await assertTaskBelongsToOrg(
         ctx.db,
         input.taskId,
