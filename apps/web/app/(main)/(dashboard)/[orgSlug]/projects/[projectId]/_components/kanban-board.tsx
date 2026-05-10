@@ -10,10 +10,15 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { trpc } from "@/src/trpc/react";
-import { useKanbanStore, type KanbanTask, type TaskStatus } from "@/src/stores/kanban-store";
+import { trpc } from "@/src/providers/trpc-react-provider";
+import { useKanbanStore } from "@/src/stores/kanban-store";
+import type { Task as KanbanTask, TaskStatus } from "@shipyard/types/task";
+import { useSocket } from "@/src/providers/socket-provider";
+import { useSocketTasks } from "@/src/hooks/use-socket-tasks";
+import { usePresence } from "@/src/hooks/use-presence";
 import { KanbanColumn } from "./kanban-column";
 import { TaskCard } from "./task-card";
+import { PresenceAvatars } from "./presence-avatars";
 
 const COLUMNS: { id: TaskStatus; label: string }[] = [
   { id: "TODO", label: "To Do" },
@@ -46,6 +51,9 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const { tasks, setTasks, moveTask, reorderTasks } = useKanbanStore();
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null);
+  const { socket } = useSocket();
+  useSocketTasks(projectId);
+  const onlineUsers = usePresence(projectId);
 
   // Hydrate store once on mount
   useEffect(() => {
@@ -57,6 +65,14 @@ export function KanbanBoard({
   );
 
   const updateStatus = trpc.task.updateStatus.useMutation({
+    onSuccess: (data) => {
+      socket?.emit("task:moved", {
+        projectId,
+        taskId: data.id,
+        status: data.status as TaskStatus,
+        position: data.position,
+      });
+    },
     onError: (_err, vars) => {
       // Revert optimistic move on error
       const prev = initialTasks.find((t) => t.id === vars.taskId);
@@ -64,7 +80,14 @@ export function KanbanBoard({
     },
   });
 
-  const reorder = trpc.task.reorder.useMutation();
+  const reorder = trpc.task.reorder.useMutation({
+    onSuccess: (_data, vars) => {
+      socket?.emit("task:reordered", {
+        projectId,
+        tasks: vars.tasks,
+      });
+    },
+  });
 
   function handleDragStart(event: DragStartEvent) {
     const task = tasks.find((t) => t.id === event.active.id);
@@ -140,6 +163,12 @@ export function KanbanBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
+      {onlineUsers.length > 0 && (
+        <div className="flex justify-end shrink-0">
+          <PresenceAvatars users={onlineUsers} />
+        </div>
+      )}
+
       <div className="flex gap-3 overflow-x-auto pb-4 flex-1 min-h-0">
         {COLUMNS.map((col) => (
           <KanbanColumn
