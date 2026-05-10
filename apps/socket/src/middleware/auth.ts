@@ -22,7 +22,7 @@ export async function authMiddleware(
   const token = socket.handshake.auth.token as string | undefined;
 
   if (!token) {
-    return next(new Error("No authentication token provided"));
+    return next(new Error("UNAUTHORIZED"));
   }
 
   const secret = process.env.SOCKET_SECRET;
@@ -40,7 +40,7 @@ export async function authMiddleware(
     });
 
     if (!user) {
-      return next(new Error("User not found"));
+      return next(new Error("UNAUTHORIZED"));
     }
 
     socket.data.userId = user.id;
