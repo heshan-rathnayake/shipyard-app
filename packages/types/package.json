@@ -1,0 +1,17 @@
+{
+  "name": "@shipyard/types",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./task": "./src/task.ts",
+    "./socket": "./src/socket.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@shipyard/typescript-config": "*",
+    "@types/node": "^22",
+    "typescript": "5.9.2"
+  }
+}
