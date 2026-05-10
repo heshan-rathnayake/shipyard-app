@@ -33,9 +33,9 @@ export function buildUserList(
   presence: PresenceMap,
   projectId: string,
 ): PresenceUser[] {
-  const project = presence.get(projectId);
-  if (!project) return [];
-  return [...project.entries()].map(([userId, entry]) => ({
+  const projectViewers = presence.get(projectId);
+  if (!projectViewers) return [];
+  return [...projectViewers.entries()].map(([userId, entry]) => ({
     userId,
     name: entry.name,
     image: entry.image,
