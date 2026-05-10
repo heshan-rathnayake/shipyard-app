@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import { trpc } from "@/src/trpc/react";
+import { trpc } from "@/src/providers/trpc-react-provider";
 import { useKanbanStore } from "@/src/stores/kanban-store";
-import type { KanbanTask, TaskPriority } from "@/src/stores/kanban-store";
+import type { Task as KanbanTask, TaskPriority } from "@shipyard/types/task";
+import { useSocket } from "@/src/providers/socket-provider";
 import { Button } from "@shipyard/ui/components/button";
 import { Input } from "@shipyard/ui/components/input";
 import { Textarea } from "@shipyard/ui/components/textarea";
@@ -42,6 +43,7 @@ interface Member {
 
 interface TaskDetailSheetProps {
   task: KanbanTask;
+  projectId: string;
   orgId: string;
   callerRole: string;
   currentMemberId: string;
@@ -59,6 +61,7 @@ const PRIORITIES: { value: TaskPriority; label: string }[] = [
 
 export function TaskDetailSheet({
   task,
+  projectId,
   orgId,
   callerRole,
   currentMemberId,
@@ -68,6 +71,7 @@ export function TaskDetailSheet({
 }: TaskDetailSheetProps) {
   const isMobile = useIsMobile();
   const { updateTask, removeTask } = useKanbanStore();
+  const { socket } = useSocket();
   const router = useRouter();
 
   const [title, setTitle] = useState(task.title);
@@ -97,6 +101,7 @@ export function TaskDetailSheet({
   const remove = trpc.task.delete.useMutation({
     onSuccess: () => {
       removeTask(task.id);
+      socket?.emit("task:deleted", { projectId, taskId: task.id });
       onOpenChange(false);
       router.refresh();
     },
@@ -104,12 +109,17 @@ export function TaskDetailSheet({
 
   const update = trpc.task.update.useMutation({
     onSuccess: (updated) => {
-      updateTask(task.id, {
+      const changes = {
         title: updated.title,
         description: updated.description ?? null,
         priority: updated.priority as TaskPriority,
         assignee: updated.assignee ?? null,
         dueDate: (updated.dueDate as unknown as string | null) ?? null,
+      };
+      updateTask(task.id, changes);
+      socket?.emit("task:updated", {
+        projectId,
+        task: { ...task, ...changes },
       });
       setIsDirty(false);
       router.refresh();
