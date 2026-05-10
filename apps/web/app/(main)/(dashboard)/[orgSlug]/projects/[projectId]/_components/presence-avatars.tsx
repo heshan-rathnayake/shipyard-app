@@ -26,8 +26,12 @@ export function PresenceAvatars({ users }: PresenceAvatarsProps) {
             className="size-7 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden"
           >
             {u.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={u.image} alt={u.name ?? ""} className="size-full object-cover" />
+              <img
+                src={u.image}
+                alt={u.name ?? ""}
+                referrerPolicy="no-referrer"
+                className="size-full object-cover"
+              />
             ) : (
               <span className="text-[10px] font-medium leading-none">
                 {userInitials(u.name, null)}
