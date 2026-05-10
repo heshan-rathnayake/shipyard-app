@@ -17,7 +17,7 @@ export const socketRouter = router({
     const token = jwt.sign(
       { userId: ctx.session.user.id },
       secret,
-      { expiresIn: "15m" },
+      { expiresIn: "60s" },
     );
 
     return { token };
