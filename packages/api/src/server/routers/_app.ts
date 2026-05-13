@@ -6,6 +6,7 @@ import { projectRouter } from "./project";
 import { taskRouter } from "./task";
 import { commentRouter } from "./comment";
 import { socketRouter } from "./socket";
+import { subscriptionRouter } from "./subscription";
 
 export const appRouter = router({
   organization: organizationRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   task: taskRouter,
   comment: commentRouter,
   socket: socketRouter,
+  subscription: subscriptionRouter,
 });
 
 export type AppRouter = typeof appRouter;
