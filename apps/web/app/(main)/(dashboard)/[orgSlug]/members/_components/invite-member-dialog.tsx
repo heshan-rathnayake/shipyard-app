@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Lock, UserPlus } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { UserPlus } from "lucide-react";
 import { trpc } from "@/src/providers/trpc-react-provider";
 import { Button } from "@shipyard/ui/components/button";
 import { Input } from "@shipyard/ui/components/input";
@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@shipyard/ui/components/select";
 import type { MemberRole } from "@shipyard/db/enum";
+import { UpgradeDialog } from "@/src/components/upgrade-dialog";
 
 const ALL_ROLES: { value: MemberRole; label: string }[] = [
   { value: "OWNER", label: "Owner" },
@@ -44,10 +45,9 @@ export function InviteMemberDialog({
   memberLimitReached,
 }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"OWNER" | "ADMIN" | "MEMBER" | "VIEWER">(
-    "MEMBER",
-  );
+  const [role, setRole] = useState<MemberRole>("MEMBER");
   const canInvite = callerRole === "OWNER" || callerRole === "ADMIN";
 
   const assignableRoles =
@@ -56,6 +56,8 @@ export function InviteMemberDialog({
       : ALL_ROLES.filter((r) => r.value === "MEMBER" || r.value === "VIEWER");
 
   const router = useRouter();
+  const params = useParams();
+  const orgSlug = typeof params.orgSlug === "string" ? params.orgSlug : "";
 
   const invite = trpc.member.invite.useMutation({
     onSuccess: () => {
@@ -66,41 +68,34 @@ export function InviteMemberDialog({
     },
   });
 
-  function handleSubmit() {
-    if (memberLimitReached) return;
+  if (!canInvite) return null;
 
-    const trimmed = email.trim();
-    if (trimmed) invite.mutate({ orgId, email: trimmed, role });
+  if (memberLimitReached) {
+    return (
+      <>
+        <Button size="sm" onClick={() => setUpgradeOpen(true)}>
+          <UserPlus className="size-4" />
+          Invite member
+        </Button>
+        <UpgradeDialog
+          open={upgradeOpen}
+          onOpenChange={setUpgradeOpen}
+          orgId={orgId}
+          orgSlug={orgSlug}
+          limitHit="members"
+        />
+      </>
+    );
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {canInvite && (
-        <span
-          title={
-            memberLimitReached
-              ? "You have reached the member limit. Upgrade to Pro to invite more members."
-              : undefined
-          }
-          className="inline-flex"
-        >
-          <DialogTrigger asChild>
-            <Button size="sm" disabled={memberLimitReached}>
-              {!memberLimitReached ? (
-                <>
-                  <UserPlus className="size-4" />
-                  Invite member
-                </>
-              ) : (
-                <>
-                  <Lock className="size-4" />
-                  Upgrade to Pro
-                </>
-              )}
-            </Button>
-          </DialogTrigger>
-        </span>
-      )}
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <UserPlus className="size-4" />
+          Invite member
+        </Button>
+      </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -120,7 +115,7 @@ export function InviteMemberDialog({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSubmit();
+                if (e.key === "Enter") invite.mutate({ orgId, email: email.trim(), role });
               }}
               autoFocus
             />
@@ -155,8 +150,8 @@ export function InviteMemberDialog({
             Cancel
           </Button>
           <Button
-            disabled={!email.trim() || invite.isPending || memberLimitReached}
-            onClick={handleSubmit}
+            disabled={!email.trim() || invite.isPending}
+            onClick={() => invite.mutate({ orgId, email: email.trim(), role })}
           >
             {invite.isPending ? "Sending…" : "Send invite"}
           </Button>

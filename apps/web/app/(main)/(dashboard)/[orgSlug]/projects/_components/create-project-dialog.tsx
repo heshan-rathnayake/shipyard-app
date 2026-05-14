@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { FolderPlus, Lock } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { FolderPlus } from "lucide-react";
 import { trpc } from "@/src/providers/trpc-react-provider";
 import { Button } from "@shipyard/ui/components/button";
 import { Input } from "@shipyard/ui/components/input";
@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@shipyard/ui/components/dialog";
+import { UpgradeDialog } from "@/src/components/upgrade-dialog";
 
 interface CreateProjectDialogProps {
   orgId: string;
@@ -28,9 +29,12 @@ export function CreateProjectDialog({
   projectLimitReached,
 }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const router = useRouter();
+  const params = useParams();
+  const orgSlug = typeof params.orgSlug === "string" ? params.orgSlug : "";
 
   const create = trpc.project.create.useMutation({
     onSuccess: () => {
@@ -51,32 +55,32 @@ export function CreateProjectDialog({
     });
   }
 
+  if (projectLimitReached) {
+    return (
+      <>
+        <Button size="sm" onClick={() => setUpgradeOpen(true)}>
+          <FolderPlus className="size-4" />
+          New project
+        </Button>
+        <UpgradeDialog
+          open={upgradeOpen}
+          onOpenChange={setUpgradeOpen}
+          orgId={orgId}
+          orgSlug={orgSlug}
+          limitHit="projects"
+        />
+      </>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <span
-        title={
-          projectLimitReached
-            ? "You have reached the project limit. Upgrade to Pro to create more projects."
-            : undefined
-        }
-        className="inline-flex"
-      >
-        <DialogTrigger asChild>
-          <Button size="sm" disabled={projectLimitReached}>
-            {!projectLimitReached ? (
-              <>
-                <FolderPlus className="size-4" />
-                New project
-              </>
-            ) : (
-              <>
-                <Lock className="size-4" />
-                Upgrade to Pro
-              </>
-            )}
-          </Button>
-        </DialogTrigger>
-      </span>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <FolderPlus className="size-4" />
+          New project
+        </Button>
+      </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

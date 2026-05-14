@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronsUpDown, Lock, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 import type { SubscriptionTier } from "@shipyard/db/enum";
 import { ORG_OWNER_LIMITS } from "@shipyard/api/config/plans";
 import {
@@ -22,6 +22,7 @@ import {
 } from "@shipyard/ui/components/sidebar";
 import { useOrgStore } from "@/src/stores/org-store";
 import { CreateOrgDialog } from "./create-org-dialog";
+import { UpgradeDialog } from "@/src/components/upgrade-dialog";
 
 interface Org {
   id: string;
@@ -47,6 +48,7 @@ export function OrgSwitcher({
 }) {
   const { isMobile } = useSidebar();
   const [createOrgOpen, setCreateOrgOpen] = React.useState(false);
+  const [upgradeOpen, setUpgradeOpen] = React.useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -54,8 +56,6 @@ export function OrgSwitcher({
 
   function handleOrgChange(orgSlug: string) {
     setActiveOrgSlug(orgSlug);
-    // If currently on a page of the active org, navigate to the same sub-page for the new org.
-    // Guard on activeOrgSlug so the regex is never built with an undefined slug.
     if (activeOrgSlug) {
       const match = pathname.match(new RegExp(`^\\/${activeOrgSlug}(\\/.*)?$`));
       if (match) {
@@ -65,8 +65,6 @@ export function OrgSwitcher({
     }
   }
 
-  // Initialize the store on mount: prefer the org slug already in the URL,
-  // fall back to orgs[0] only when the path doesn't match any known org.
   React.useEffect(() => {
     if (!activeOrgSlug) {
       const slugFromPath = pathname.split("/")[1];
@@ -76,10 +74,11 @@ export function OrgSwitcher({
     }
   }, [activeOrgSlug, orgs, pathname, setActiveOrgSlug]);
 
-  // Derive the full org object from the store slug; fall back to first org before store initializes
   const activeOrg = orgs.find((o) => o.slug === activeOrgSlug) ?? orgs[0];
 
   if (!activeOrg) return null;
+
+  const atOrgLimit = ownedOrgCount >= (ORG_OWNER_LIMITS[activeOrg.subscriptionTier] ?? ORG_OWNER_LIMITS.FREE);
 
   return (
     <>
@@ -130,45 +129,38 @@ export function OrgSwitcher({
 
               <DropdownMenuSeparator />
 
-              {ownedOrgCount < ORG_OWNER_LIMITS.FREE ? (
-                /* e.preventDefault() stops Radix closing the dropdown in a way
-                   that steals focus and immediately collapses the dialog */
-                <DropdownMenuItem
-                  className="gap-2 p-2"
-                  onSelect={(e) => {
-                    e.preventDefault();
+              <DropdownMenuItem
+                className="gap-2 p-2"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  if (atOrgLimit) {
+                    setUpgradeOpen(true);
+                  } else {
                     setCreateOrgOpen(true);
-                  }}
-                >
-                  <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                    <Plus className="size-4" />
-                  </div>
-                  <span className="font-medium text-muted-foreground">
-                    Add organization
-                  </span>
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem disabled className="gap-2 p-2">
-                  <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                    <Lock className="size-4" />
-                  </div>
-                  <div className="grid">
-                    <span className="font-medium text-muted-foreground">
-                      Add organization
-                    </span>
-                    <span className="text-xs text-muted-foreground/60">
-                      Upgrade to Pro
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              )}
+                  }
+                }}
+              >
+                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                  <Plus className="size-4" />
+                </div>
+                <span className="font-medium text-muted-foreground">
+                  Add organization
+                </span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
 
-      {/* Dialog lives outside DropdownMenu to avoid Radix focus-management conflict */}
+      {/* Dialogs live outside DropdownMenu to avoid Radix focus-management conflict */}
       <CreateOrgDialog open={createOrgOpen} onOpenChange={setCreateOrgOpen} />
+      <UpgradeDialog
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        orgId={activeOrg.id}
+        orgSlug={activeOrg.slug}
+        limitHit="orgs"
+      />
     </>
   );
 }
