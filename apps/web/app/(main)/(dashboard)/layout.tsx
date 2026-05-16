@@ -20,7 +20,15 @@ export default function DashboardLayout({
           <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
             <SidebarTrigger className="-ml-1" />
           </header>
-          <main className="flex-1 p-6">{children}</main>
+          <main
+            className="flex-1 p-6"
+            style={{
+              background:
+                "linear-gradient(to top, oklch(50.8% 0.118 165.612 / 0.04) 0%, transparent 60%)",
+            }}
+          >
+            {children}
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
