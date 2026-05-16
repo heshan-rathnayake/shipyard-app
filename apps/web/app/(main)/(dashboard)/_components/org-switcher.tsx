@@ -20,6 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@shipyard/ui/components/sidebar";
+import { Skeleton } from "@shipyard/ui/components/skeleton";
 import { useOrgStore } from "@/src/stores/org-store";
 import { CreateOrgDialog } from "./create-org-dialog";
 import { UpgradeDialog } from "@/src/components/upgrade-dialog";
@@ -54,6 +55,18 @@ export function OrgSwitcher({
 
   const { activeOrgSlug, setActiveOrgSlug } = useOrgStore();
 
+  // Always start false — server and client initial renders both see false (no hydration mismatch).
+  // useEffect runs client-only: resolves immediately if already hydrated (same-session nav),
+  // otherwise subscribes to onFinishHydration for cold page loads.
+  const [hydrated, setHydrated] = React.useState(false);
+  React.useEffect(() => {
+    if (useOrgStore.persist.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+    return useOrgStore.persist.onFinishHydration(() => setHydrated(true));
+  }, []);
+
   function handleOrgChange(orgSlug: string) {
     setActiveOrgSlug(orgSlug);
     if (activeOrgSlug) {
@@ -66,13 +79,36 @@ export function OrgSwitcher({
   }
 
   React.useEffect(() => {
-    if (!activeOrgSlug) {
+    // Wait until localStorage has been read — prevents the fallback from
+    // firing before persist restores the stored slug and overwriting it.
+    if (!hydrated) return;
+
+    const isValid = orgs.some((o) => o.slug === activeOrgSlug);
+    if (!activeOrgSlug || !isValid) {
+      // No persisted value, or the stored org is no longer accessible
+      // (e.g. user was removed from that org) — derive from URL then fall back
       const slugFromPath = pathname.split("/")[1];
       const orgFromPath = orgs.find((o) => o.slug === slugFromPath);
       const fallback = orgFromPath ?? orgs[0];
       if (fallback) setActiveOrgSlug(fallback.slug);
     }
-  }, [activeOrgSlug, orgs, pathname, setActiveOrgSlug]);
+  }, [hydrated, activeOrgSlug, orgs, pathname, setActiveOrgSlug]);
+
+  if (!hydrated) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex items-center gap-2 px-2 py-1.5 min-h-12">
+            <Skeleton className="size-8 rounded-lg shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-2.5 w-16" />
+            </div>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
 
   const activeOrg = orgs.find((o) => o.slug === activeOrgSlug) ?? orgs[0];
 
