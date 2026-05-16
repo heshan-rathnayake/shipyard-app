@@ -53,7 +53,7 @@ export default async function ActivityPage({
   const initialCursor = hasMore ? (items[items.length - 1]?.id ?? null) : null;
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-6xl">
       {/* Back link */}
       <Link
         href="/dashboard"
