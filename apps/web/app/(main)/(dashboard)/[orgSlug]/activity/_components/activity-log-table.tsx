@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { trpc } from "@/src/providers/trpc-react-provider";
@@ -10,7 +10,6 @@ import {
   AvatarImage,
 } from "@shipyard/ui/components/avatar";
 import { Badge } from "@shipyard/ui/components/badge";
-import { Button } from "@shipyard/ui/components/button";
 import {
   Table,
   TableBody,
@@ -19,9 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from "@shipyard/ui/components/table";
+import { Spinner } from "@shipyard/ui/components/spinner";
 import { userInitials } from "@/lib/userInitials";
 import { ACTION_CONFIG, type ActivityLogItem } from "./types";
 import { ActivityLogDetail } from "./activity-log-detail";
+import { Loader } from "@/src/components/loader";
 
 dayjs.extend(relativeTime);
 
@@ -90,6 +91,20 @@ export function ActivityLogTable({
   const [nextCursor, setNextCursor] = useState<string | null>(initialCursor);
   const [fetchCursor, setFetchCursor] = useState<string | undefined>(undefined);
   const [selectedLog, setSelectedLog] = useState<ActivityLogItem | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [tip, setTip] = useState<{ x: number; y: number; visible: boolean }>({
+    x: 0,
+    y: 0,
+    visible: false,
+  });
+
+  const handleRowMouseMove = useCallback((e: React.MouseEvent) => {
+    setTip({ x: e.clientX, y: e.clientY, visible: true });
+  }, []);
+
+  const handleRowMouseLeave = useCallback(() => {
+    setTip((prev) => ({ ...prev, visible: false }));
+  }, []);
 
   const {
     data: loadMoreData,
@@ -113,6 +128,24 @@ export function ActivityLogTable({
     setFetchCursor(undefined);
   }, [loadMoreData]);
 
+  // Infinite scroll — fire when sentinel enters the viewport
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && nextCursor && !isFetching) {
+          setFetchCursor(nextCursor);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [nextCursor, isFetching]);
+
   if (allItems.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -124,6 +157,15 @@ export function ActivityLogTable({
 
   return (
     <div className="space-y-4">
+      {/* Cursor-following tooltip */}
+      {tip.visible && (
+        <div
+          className="fixed z-50 pointer-events-none rounded-md border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md"
+          style={{ left: tip.x + 14, top: tip.y + 14 }}
+        >
+          Click for more details
+        </div>
+      )}
       <div className="rounded-lg border overflow-hidden">
         <Table>
           <TableHeader>
@@ -143,6 +185,8 @@ export function ActivityLogTable({
                   key={log.id}
                   className="cursor-pointer"
                   onClick={() => setSelectedLog(log)}
+                  onMouseMove={handleRowMouseMove}
+                  onMouseLeave={handleRowMouseLeave}
                 >
                   {/* Who */}
                   <TableCell>
@@ -196,25 +240,17 @@ export function ActivityLogTable({
         </Table>
       </div>
 
-      {/* Load more */}
-      {nextCursor && (
-        <div className="flex justify-center">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isFetching}
-            onClick={() => setFetchCursor(nextCursor)}
-          >
-            {isFetching ? "Loading…" : "Load more"}
-          </Button>
-        </div>
-      )}
-
-      {isError && (
-        <p className="text-center text-sm text-destructive">
-          Failed to load more entries. Please try again.
-        </p>
-      )}
+      {/* Sentinel — observed by IntersectionObserver to trigger next page load */}
+      <div ref={sentinelRef} className="py-2 flex justify-center">
+        {isFetching && (
+          <Loader message="Loading..." size={4} />
+        )}
+        {isError && (
+          <p className="text-sm text-destructive">
+            Failed to load more entries. Please try again.
+          </p>
+        )}
+      </div>
 
       <ActivityLogDetail
         log={selectedLog}
