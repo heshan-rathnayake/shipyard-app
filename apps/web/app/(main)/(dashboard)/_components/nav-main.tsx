@@ -1,8 +1,18 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { Activity, ChevronRight, FolderKanban, LayoutDashboard, Settings, Users, CreditCard, Webhook } from "lucide-react";
+import {
+  Activity,
+  ChevronRight,
+  FolderKanban,
+  LayoutDashboard,
+  Settings,
+  Users,
+  CreditCard,
+  Webhook,
+} from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -19,6 +29,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@shipyard/ui/components/collapsible";
+import { Skeleton } from "@shipyard/ui/components/skeleton";
 import { useOrgStore } from "@/src/stores/org-store";
 
 const globalItems = [
@@ -35,6 +46,9 @@ export function NavMain({
   const params = useParams();
   const storeOrgSlug = useOrgStore((s) => s.activeOrgSlug);
 
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
   // URL param wins when navigating directly to an org page;
   // otherwise fall back to the org selected in the switcher.
   const urlOrgSlug = typeof params.orgSlug === "string" ? params.orgSlug : null;
@@ -42,7 +56,8 @@ export function NavMain({
 
   const currentRole = memberships.find((m) => m.orgSlug === orgSlug)?.role;
   const isOwner = currentRole === "OWNER";
-  const isSettingsActive = !!orgSlug && pathname.startsWith(`/${orgSlug}/org-settings`);
+  const isSettingsActive =
+    !!orgSlug && pathname.startsWith(`/${orgSlug}/org-settings`);
 
   return (
     <>
@@ -68,96 +83,121 @@ export function NavMain({
         </SidebarGroupContent>
       </SidebarGroup>
 
-      {/* Org-scoped nav — only visible when an org is active */}
-      {orgSlug && (
+      {/* Org-scoped nav — skeleton until the Zustand store has hydrated from localStorage */}
+      {!mounted ? (
         <SidebarGroup>
           <SidebarGroupLabel>Organization</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith(`/${orgSlug}/projects`)}
-                  tooltip="Projects"
-                >
-                  <Link href={`/${orgSlug}/projects`}>
-                    <FolderKanban />
-                    <span>Projects</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === `/${orgSlug}/members`}
-                  tooltip="Members"
-                >
-                  <Link href={`/${orgSlug}/members`}>
-                    <Users />
-                    <span>Members</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === `/${orgSlug}/activity`}
-                  tooltip="Activity"
-                >
-                  <Link href={`/${orgSlug}/activity`}>
-                    <Activity />
-                    <span>Activity</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              {/* Settings — collapsible with sub-items */}
-              <Collapsible
-                asChild
-                defaultOpen={isSettingsActive}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton isActive={isSettingsActive} tooltip="Settings">
-                      <Settings />
-                      <span>Organization Settings</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          isActive={pathname.startsWith(`/${orgSlug}/org-settings/billing`)}
-                        >
-                          <Link href={`/${orgSlug}/org-settings/billing`}>
-                            <CreditCard />
-                            <span>Billing</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      {isOwner && (
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={pathname.startsWith(`/${orgSlug}/org-settings/webhooks`)}
-                          >
-                            <Link href={`/${orgSlug}/org-settings/webhooks`}>
-                              <Webhook />
-                              <span>Webhooks</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SidebarMenuItem key={i}>
+                  <div className="flex items-center gap-2 px-2 py-1.5">
+                    <Skeleton className="size-5 shrink-0" />
+                    <Skeleton className="h-5 w-40" />
+                  </div>
                 </SidebarMenuItem>
-              </Collapsible>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+      ) : (
+        orgSlug && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Organization</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(`/${orgSlug}/projects`)}
+                    tooltip="Projects"
+                  >
+                    <Link href={`/${orgSlug}/projects`}>
+                      <FolderKanban />
+                      <span>Projects</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === `/${orgSlug}/members`}
+                    tooltip="Members"
+                  >
+                    <Link href={`/${orgSlug}/members`}>
+                      <Users />
+                      <span>Members</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === `/${orgSlug}/activity`}
+                    tooltip="Activity"
+                  >
+                    <Link href={`/${orgSlug}/activity`}>
+                      <Activity />
+                      <span>Activity</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                {/* Settings — collapsible with sub-items */}
+                <Collapsible
+                  asChild
+                  defaultOpen={isSettingsActive}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isSettingsActive}
+                        tooltip="Settings"
+                      >
+                        <Settings />
+                        <span>Organization Settings</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={pathname.startsWith(
+                              `/${orgSlug}/org-settings/billing`,
+                            )}
+                          >
+                            <Link href={`/${orgSlug}/org-settings/billing`}>
+                              <CreditCard />
+                              <span>Billing</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        {isOwner && (
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={pathname.startsWith(
+                                `/${orgSlug}/org-settings/webhooks`,
+                              )}
+                            >
+                              <Link href={`/${orgSlug}/org-settings/webhooks`}>
+                                <Webhook />
+                                <span>Webhooks</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        )}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )
       )}
     </>
   );

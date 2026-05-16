@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
   BadgeCheck,
   Bell,
@@ -33,6 +34,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@shipyard/ui/components/sidebar";
+import { Skeleton } from "@shipyard/ui/components/skeleton";
 import { userInitials } from "@/lib/userInitials";
 
 interface NavUserProps {
@@ -59,7 +61,27 @@ const themeLabel: Record<Theme, string> = {
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const initials = userInitials(user.name, user.email);
+
   const { theme, setTheme } = useTheme();
+
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <Skeleton className="size-8 rounded-lg shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-2.5 w-32" />
+            </div>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
 
   const currentTheme = (
     themeOrder.includes(theme as Theme) ? theme : "system"
