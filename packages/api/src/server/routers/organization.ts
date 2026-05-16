@@ -36,21 +36,38 @@ export const organizationRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Enforce per-tier ownership limit
-      const ownedCount = await ctx.db.member.count({
+      // Enforce per-tier ownership limit.
+      // The limit is determined by the highest subscription tier the user holds
+      // across all orgs they already own — same logic as the frontend switcher check.
+      const ownedOrgs = await ctx.db.member.findMany({
         where: { userId: ctx.session.user.id, role: "OWNER" },
+        select: { organization: { select: { subscriptionTier: true } } },
       });
 
-      if (ownedCount >= ORG_OWNER_LIMITS.FREE) {
+      const ownedCount = ownedOrgs.length;
+      const tierOrder: Record<string, number> = { FREE: 0, PRO: 1, ENTERPRISE: 2 };
+      const highestTier = ownedOrgs.reduce<"FREE" | "PRO" | "ENTERPRISE">(
+        (best, m) => {
+          const t = m.organization.subscriptionTier;
+          return (tierOrder[t] ?? 0) > (tierOrder[best] ?? 0) ? t : best;
+        },
+        "FREE",
+      );
+      const limit = ORG_OWNER_LIMITS[highestTier] ?? ORG_OWNER_LIMITS.FREE;
+
+      if (ownedCount >= limit) {
         logger.warn("Org ownership limit reached", {
           userId: ctx.session.user.id,
           ownedCount,
-          limit: ORG_OWNER_LIMITS.FREE,
+          highestTier,
+          limit,
         });
         throw new TRPCError({
           code: "FORBIDDEN",
           message:
-            "Free plan is limited to 1 organization. Upgrade to Pro to create more.",
+            highestTier === "FREE"
+              ? "Free plan is limited to 1 organization. Upgrade to Pro to create more."
+              : `Your plan allows up to ${limit} owned organizations.`,
         });
       }
 
