@@ -133,6 +133,8 @@ async function updateLog(
 }
 
 // Re-export templates so callers can import from one place
+export { renderPaymentFailedEmail } from "./templates/payment-failed";
+export type { PaymentFailedEmailProps } from "./templates/payment-failed";
 export { renderInviteEmail } from "./templates/invite";
 export type { InviteEmailProps } from "./templates/invite";
 export { renderTaskAssignedEmail } from "./templates/task-assigned";
