@@ -299,6 +299,7 @@ export function TaskDetailSheet({
               orgId={orgId}
               callerRole={callerRole}
               currentMemberId={currentMemberId}
+              members={members}
             />
           </div>
 
