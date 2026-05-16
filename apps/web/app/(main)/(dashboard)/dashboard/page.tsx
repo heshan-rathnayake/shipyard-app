@@ -8,7 +8,7 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const memberships = await db.member.findMany({
+  const membershipsRaw = await db.member.findMany({
     where: { userId: session.user.id },
     select: {
       role: true,
@@ -22,14 +22,21 @@ export default async function DashboardPage() {
         },
       },
     },
-    orderBy: { joinedAt: "asc" },
+    orderBy: { organization: { name: "asc" } },
+  });
+
+  // Float owned orgs to the top; within each group, name order from the DB is preserved.
+  const memberships = [...membershipsRaw].sort((a, b) => {
+    if (a.role === "OWNER" && b.role !== "OWNER") return -1;
+    if (b.role === "OWNER" && a.role !== "OWNER") return 1;
+    return 0;
   });
 
   // No orgs yet — send to guided setup instead of an empty state
   if (memberships.length === 0) redirect("/onboarding");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Organizations</h1>
       </div>
