@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { db } from "@shipyard/db";
 import { sendEmail, renderVerifyEmail } from "@shipyard/email";
+import { logger } from "@shipyard/logger";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,7 +30,8 @@ export async function register(
     email: formData.get("email"),
     password: formData.get("password"),
   };
-  const callbackUrl = (formData.get("callbackUrl") as string | null) ?? undefined;
+  const callbackUrl =
+    (formData.get("callbackUrl") as string | null) ?? undefined;
 
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) {
@@ -79,7 +81,9 @@ export async function register(
       data: { identifier: email, token, expires },
     });
 
-    const cbParam = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : "";
+    const cbParam = callbackUrl
+      ? `&callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : "";
     const verifyUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}&email=${encodeURIComponent(email)}${cbParam}`;
 
     const html = await renderVerifyEmail({ name, verifyUrl });
@@ -92,7 +96,7 @@ export async function register(
       db,
     });
   } catch (err) {
-    console.error("[register] unexpected error:", err);
+    logger.error("[register] unexpected error:", err);
     return {
       status: "error",
       message: "Something went wrong. Please try again.",
