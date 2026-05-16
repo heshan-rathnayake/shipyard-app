@@ -79,7 +79,7 @@ export function OrganizationCard({
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px)",
+            "linear-gradient(rgba(0, 150, 137,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 150, 137,0.06) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }}
       />
@@ -88,7 +88,7 @@ export function OrganizationCard({
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse at 40% 50%, rgba(99,102,241,0.09) 0%, transparent 65%)",
+            "radial-gradient(ellipse at 40% 50%, rgba(0, 150, 137,0.15) 0%, transparent 75%)",
         }}
       />
 
