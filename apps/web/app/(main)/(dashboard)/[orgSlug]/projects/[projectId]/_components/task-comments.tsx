@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -18,11 +18,46 @@ import { ConfirmDialog } from "@/src/components/confirm-dialog";
 
 dayjs.extend(relativeTime);
 
+interface Member {
+  id: string;
+  user: { id: string; name: string | null; image: string | null };
+}
+
 interface TaskCommentsProps {
   taskId: string;
   orgId: string;
   callerRole: string;
   currentMemberId: string;
+  members: Member[];
+}
+
+/**
+ * Split comment text into plain spans and highlighted @mention spans.
+ *
+ * Token format stored in DB: @[Display Name|memberId]
+ * - memberId is the source of truth — always looked up against the live
+ *   members prop so renames are reflected automatically.
+ * - Display Name is a snapshot fallback shown when a member has left the org.
+ */
+function renderMentions(text: string, members: Member[]) {
+  // Split on @[...] tokens; capture group keeps the token in the array
+  const parts = text.split(/(@\[[^\]]+\])/g);
+  return parts.map((part, i) => {
+    const tokenMatch = part.match(/^@\[([^|]+)\|([^\]]+)\]$/);
+    if (tokenMatch) {
+      const storedName = tokenMatch[1]; // snapshot — fallback only
+      const memberId = tokenMatch[2];   // source of truth
+      // Prefer live name so renames are always reflected
+      const liveMember = members.find((m) => m.id === memberId);
+      const displayName = liveMember?.user.name ?? storedName;
+      return (
+        <span key={i} className="font-semibold text-cyan-800">
+          @{displayName}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
 }
 
 export function TaskComments({
@@ -30,10 +65,22 @@ export function TaskComments({
   orgId,
   callerRole,
   currentMemberId,
+  members,
 }: TaskCommentsProps) {
   const canManage = callerRole === "OWNER" || callerRole === "ADMIN";
   const [content, setContent] = useState("");
   const [confirmCommentId, setConfirmCommentId] = useState<string | null>(null);
+
+  // Mention state
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionStart, setMentionStart] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mentionListRef = useRef<HTMLDivElement>(null);
+  // Maps display name → memberId for every mention inserted this session.
+  // Used to encode @Display Name → @[Display Name|id] just before submit.
+  const mentionMapRef = useRef(new Map<string, string>());
   const router = useRouter();
 
   const { data: comments, refetch } = trpc.comment.list.useQuery({
@@ -44,6 +91,7 @@ export function TaskComments({
   const create = trpc.comment.create.useMutation({
     onSuccess: () => {
       setContent("");
+      mentionMapRef.current.clear();
       void refetch();
     },
   });
@@ -55,10 +103,112 @@ export function TaskComments({
     },
   });
 
+  // Members whose first name OR normalized full name starts with the typed query
+  const filteredMembers =
+    mentionQuery !== null
+      ? members.filter((m) => {
+          const name = m.user.name ?? "";
+          const firstName = name.split(" ")[0]?.toLowerCase() ?? "";
+          const lastName = name.split(" ")[1]?.toLowerCase() ?? "";
+          const normalized = name.toLowerCase().replace(/\s+/g, "");
+          const q = mentionQuery.toLowerCase();
+          return (
+            firstName.startsWith(q) ||
+            lastName.startsWith(q) ||
+            normalized.startsWith(q)
+          );
+        })
+      : [];
+
+  // Keep the highlighted row visible when navigating with arrow keys
+  useEffect(() => {
+    if (selectedIndex >= 0 && mentionListRef.current) {
+      const item = mentionListRef.current.children[selectedIndex] as
+        | HTMLElement
+        | undefined;
+      item?.scrollIntoView({ block: "nearest" });
+    }
+  }, [selectedIndex]);
+
+  function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const val = e.target.value;
+    setContent(val);
+
+    const cursor = e.target.selectionStart ?? val.length;
+    const textBeforeCursor = val.slice(0, cursor);
+    // Active mention = @ followed by word-chars with no gap up to the cursor
+    const atMatch = textBeforeCursor.match(/@(\w*)$/);
+
+    if (atMatch) {
+      setMentionQuery(atMatch[1] ?? "");
+      setMentionStart(cursor - atMatch[0].length);
+      setSelectedIndex(0); // always start at first match on each keystroke
+    } else {
+      setMentionQuery(null);
+      setMentionStart(-1);
+      setSelectedIndex(0);
+    }
+  }
+
+  function insertMention(member: Member) {
+    const displayName = member.user.name ?? "Unknown";
+    const before = content.slice(0, mentionStart);
+    const after = content.slice(mentionStart + 1 + (mentionQuery?.length ?? 0));
+    // Textarea shows only the readable name; the ID mapping is kept separately
+    setContent(`${before}@${displayName} ${after}`);
+    mentionMapRef.current.set(displayName, member.id);
+    setMentionQuery(null);
+    setMentionStart(-1);
+    setSelectedIndex(0);
+    // Restore focus after React re-render
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    // When no dropdown is visible, only intercept ⌘↵ / Ctrl↵ for submit
+    if (filteredMembers.length === 0) {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit();
+      return;
+    }
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setSelectedIndex((i) => Math.min(i + 1, filteredMembers.length - 1));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setSelectedIndex((i) => Math.max(i - 1, 0));
+        break;
+      case "Enter":
+      case "Tab": {
+        e.preventDefault();
+        const target = filteredMembers[selectedIndex] ?? filteredMembers[0];
+        if (target) insertMention(target);
+        break;
+      }
+      case "Escape":
+        e.preventDefault();
+        setMentionQuery(null);
+        setMentionStart(-1);
+        break;
+    }
+  }
+
   function handleSubmit() {
     const trimmed = content.trim();
     if (!trimmed) return;
-    create.mutate({ taskId, orgId, content: trimmed });
+    // Encode any inserted mentions from display format → storage format
+    // e.g. "@Lisa Gibson" → "@[Lisa Gibson|cm_id]" using the mentionMap
+    // Longest names replaced first to prevent partial-name collisions
+    let encoded = trimmed;
+    const sorted = [...mentionMapRef.current.entries()].sort(
+      (a, b) => b[0].length - a[0].length,
+    );
+    for (const [name, id] of sorted) {
+      encoded = encoded.split(`@${name}`).join(`@[${name}|${id}]`);
+    }
+    create.mutate({ taskId, orgId, content: encoded });
   }
 
   return (
@@ -106,8 +256,8 @@ export function TaskComments({
                     </Button>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {comment.content}
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap wrap-break-words">
+                  {renderMentions(comment.content, members)}
                 </p>
               </div>
             </div>
@@ -120,19 +270,59 @@ export function TaskComments({
       {/* New comment input — hidden for VIEWERs */}
       {callerRole !== "VIEWER" && (
         <div className="space-y-2">
-          <Textarea
-            placeholder="Write a comment…"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={2}
-            className="resize-none"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit();
-            }}
-            maxLength={5000}
-          />
+          <div className="relative">
+            {/* Mention dropdown — floats above the textarea */}
+            {filteredMembers.length > 0 && (
+              <div
+                ref={mentionListRef}
+                className="absolute bottom-full mb-1 left-0 right-0 z-50 rounded-md border bg-popover shadow-md max-h-40 overflow-y-auto"
+              >
+                {filteredMembers.map((m, idx) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm transition-colors ${
+                      idx === selectedIndex
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent/50"
+                    }`}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // keep textarea focused during click
+                      insertMention(m);
+                    }}
+                    onMouseEnter={() => setSelectedIndex(idx)}
+                  >
+                    <Avatar className="size-5 shrink-0">
+                      <AvatarImage
+                        src={m.user.image ?? ""}
+                        alt={m.user.name ?? ""}
+                      />
+                      <AvatarFallback className="text-[10px]">
+                        {userInitials(m.user.name, null)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span>{m.user.name ?? "Unknown"}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <Textarea
+              ref={textareaRef}
+              placeholder="Write a comment… type @ to mention"
+              value={content}
+              onChange={handleContentChange}
+              onKeyDown={handleKeyDown}
+              rows={2}
+              className="resize-none"
+              maxLength={5000}
+            />
+          </div>
+
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">⌘↵ to submit</span>
+            <span className="text-xs text-muted-foreground">
+              ⌘↵ to submit · @ to mention
+            </span>
             <Button
               size="sm"
               disabled={!content.trim() || create.isPending}

@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import type { PrismaClient } from "@shipyard/db";
+import { sendEmail, renderCommentMentionEmail } from "@shipyard/email";
 import { router, protectedProcedure } from "../trpc";
-import { requireMembership, requireContributorRole } from "../../lib/membership";
+import {
+  requireMembership,
+  requireContributorRole,
+} from "../../lib/membership";
 import { logActivity, ActivityAction, EntityType } from "../../lib/activityLog";
 import { assertTaskBelongsToOrg } from "../../lib/projectGuards";
 
@@ -77,6 +82,19 @@ export const commentRouter = router({
         metadata: { taskId: input.taskId },
       });
 
+      const mentionIds = extractMentionIds(input.content);
+      if (mentionIds.length > 0) {
+        void sendMentionEmails(ctx.db, {
+          orgId: input.orgId,
+          taskId: input.taskId,
+          callerMemberId: caller.id,
+          mentionIds,
+          comment,
+        }).catch((err: unknown) =>
+          console.error("[comment.create] failed to send mention emails:", err),
+        );
+      }
+
       return comment;
     }),
 
@@ -128,3 +146,96 @@ export const commentRouter = router({
       return { success: true };
     }),
 });
+
+// ─── Email helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Extract member IDs from @[Display Name|memberId] tokens.
+ * Returns deduplicated IDs — unambiguous regardless of name collisions or future renames.
+ */
+function extractMentionIds(content: string): string[] {
+  const matches = [...content.matchAll(/@\[([^|]+)\|([^\]]+)\]/g)];
+  return [
+    ...new Set(
+      matches.map((m) => m[2]).filter((id): id is string => id !== undefined),
+    ),
+  ];
+}
+
+async function sendMentionEmails(
+  db: PrismaClient,
+  opts: {
+    orgId: string;
+    taskId: string;
+    callerMemberId: string;
+    mentionIds: string[];
+    comment: {
+      id: string;
+      content: string;
+      createdAt: Date;
+      author: { user: { name: string | null } };
+    };
+  },
+) {
+  const [members, taskWithProject] = await Promise.all([
+    // Fetch only the explicitly mentioned members by ID — no name matching
+    db.member.findMany({
+      where: {
+        id: { in: opts.mentionIds },
+        organizationId: opts.orgId,
+      },
+      select: { id: true, user: { select: { email: true, name: true } } },
+    }),
+    db.task.findUnique({
+      where: { id: opts.taskId },
+      select: {
+        title: true,
+        projectId: true,
+        project: {
+          select: {
+            name: true,
+            organization: { select: { name: true, slug: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  if (!taskWithProject?.project) return;
+
+  const { title: taskTitle, projectId, project } = taskWithProject;
+  const authorName = opts.comment.author.user.name ?? "A teammate";
+  const baseUrl = process.env.NEXTAUTH_URL ?? "";
+  const taskUrl = `${baseUrl}/${project.organization.slug}/projects/${projectId}`;
+
+  // Exclude the author (they mentioned themselves)
+  const mentionedMembers = members.filter((m) => m.id !== opts.callerMemberId);
+
+  await Promise.all(
+    mentionedMembers.map(async (m) => {
+      if (!m.user.email) return;
+      const html = await renderCommentMentionEmail({
+        mentionedName: m.user.name ?? m.user.email,
+        authorName,
+        commentText: opts.comment.content,
+        taskTitle,
+        projectName: project.name,
+        orgName: project.organization.name,
+        taskUrl,
+        createdAt: opts.comment.createdAt.toISOString(),
+      });
+      await sendEmail({
+        to: m.user.email,
+        subject: `${authorName} mentioned you in a comment`,
+        html,
+        templateName: "comment-mention",
+        templateData: {
+          commentId: opts.comment.id,
+          taskId: opts.taskId,
+          orgId: opts.orgId,
+        },
+        db,
+      });
+    }),
+  );
+}
