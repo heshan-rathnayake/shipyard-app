@@ -122,46 +122,49 @@ function CheckoutForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <PaymentElement
-        options={{
-          layout: "tabs",
-          fields: { billingDetails: { email: "auto" } },
-        }}
-      />
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
-      <Separator />
-
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1"
-          disabled={confirming}
-          onClick={onCancel}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          className="flex-1 gap-1.5"
-          disabled={!stripe || !elements || confirming}
-        >
-          {confirming ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Zap className="size-4 fill-current" />
-          )}
-          {confirming ? "Processing…" : "Subscribe to Pro"}
-        </Button>
+    <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+      {/* Scrollable payment fields */}
+      <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] py-1">
+        <PaymentElement
+          options={{
+            layout: "tabs",
+            fields: { billingDetails: { email: "auto" } },
+          }}
+        />
+        {error && <p className="text-sm text-destructive mt-3">{error}</p>}
       </div>
 
-      <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-        <Lock className="size-3" />
-        Secured by Stripe · Cancel anytime
-      </p>
+      {/* Pinned footer — always visible */}
+      <div className="shrink-0 pt-4 space-y-3 border-t mt-4">
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            disabled={confirming}
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            className="flex-1 gap-1.5"
+            disabled={!stripe || !elements || confirming}
+          >
+            {confirming ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Zap className="size-4 fill-current" />
+            )}
+            {confirming ? "Processing…" : "Subscribe to Pro"}
+          </Button>
+        </div>
+
+        <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+          <Lock className="size-3" />
+          Secured by Stripe · Cancel anytime
+        </p>
+      </div>
     </form>
   );
 }
@@ -209,7 +212,7 @@ export function StripeCheckoutDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md flex flex-col max-h-[90dvh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="size-4 fill-current text-primary" />
@@ -220,36 +223,38 @@ export function StripeCheckoutDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {!stripePromise ? (
-          <p className="text-sm text-destructive py-2">
-            Stripe is not configured.{" "}
-            <code className="font-mono text-xs">
-              NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-            </code>{" "}
-            is missing from your environment.
-          </p>
-        ) : createIntent.isPending || !clientSecret ? (
-          <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
-            <Loader2 className="size-4 animate-spin" />
-            <span className="text-sm">Loading payment form…</span>
-          </div>
-        ) : createIntent.error ? (
-          <p className="text-sm text-destructive py-2">
-            {createIntent.error.message}
-          </p>
-        ) : (
-          <Elements
-            stripe={stripePromise}
-            options={{ clientSecret, appearance: getStripeAppearance(isDark) }}
-          >
-            <CheckoutForm
-              orgId={orgId}
-              orgSlug={orgSlug}
-              onSuccess={handleSuccess}
-              onCancel={() => onOpenChange(false)}
-            />
-          </Elements>
-        )}
+        <div className="flex-1 min-h-0 flex flex-col">
+          {!stripePromise ? (
+            <p className="text-sm text-destructive py-2">
+              Stripe is not configured.{" "}
+              <code className="font-mono text-xs">
+                NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+              </code>{" "}
+              is missing from your environment.
+            </p>
+          ) : createIntent.isPending || !clientSecret ? (
+            <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
+              <Loader2 className="size-4 animate-spin" />
+              <span className="text-sm">Loading payment form…</span>
+            </div>
+          ) : createIntent.error ? (
+            <p className="text-sm text-destructive py-2">
+              {createIntent.error.message}
+            </p>
+          ) : (
+            <Elements
+              stripe={stripePromise}
+              options={{ clientSecret, appearance: getStripeAppearance(isDark) }}
+            >
+              <CheckoutForm
+                orgId={orgId}
+                orgSlug={orgSlug}
+                onSuccess={handleSuccess}
+                onCancel={() => onOpenChange(false)}
+              />
+            </Elements>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
