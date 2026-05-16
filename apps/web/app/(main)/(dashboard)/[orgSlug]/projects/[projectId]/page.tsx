@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { db } from "@shipyard/db";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
 import { KanbanBoard } from "./_components/kanban-board";
+import { ArchivedProjectBanner } from "./_components/archived-project-banner";
 
 export const metadata: Metadata = { title: "Board" };
 
@@ -57,12 +58,15 @@ export default async function ProjectBoardPage({
 
   if (!project) notFound();
 
+  const isArchived = project.status === "ARCHIVED";
+  const canManage = callerRole === "OWNER" || callerRole === "ADMIN";
+
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Back link + header */}
       <div className="space-y-1 shrink-0">
         <Link
-          href={`/${orgSlug}/projects`}
+          href={`/${orgSlug}/projects?${isArchived ? "archived=true" : ""}`}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="size-4" />
@@ -74,11 +78,21 @@ export default async function ProjectBoardPage({
         )}
       </div>
 
+      {isArchived && (
+        <ArchivedProjectBanner
+          projectId={projectId}
+          orgId={orgId}
+          orgSlug={orgSlug}
+          canManage={canManage}
+        />
+      )}
+
       <KanbanBoard
         projectId={projectId}
         orgId={orgId}
         callerRole={callerRole}
         currentMemberId={currentMemberId}
+        isArchived={isArchived}
         initialTasks={tasks.map((t) => ({
           ...t,
           dueDate: t.dueDate ? t.dueDate.toISOString() : null,

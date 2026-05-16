@@ -34,9 +34,10 @@ interface TaskCardProps {
   currentMemberId?: string;
   members?: Member[];
   isDragging?: boolean;
+  isArchived?: boolean;
 }
 
-export function TaskCard({ task, projectId = "", orgId = "", callerRole = "", currentMemberId = "", members = [], isDragging = false }: TaskCardProps) {
+export function TaskCard({ task, projectId = "", orgId = "", callerRole = "", currentMemberId = "", members = [], isDragging = false, isArchived = false }: TaskCardProps) {
   const [detailOpen, setDetailOpen] = useState(false);
 
   const {
@@ -115,6 +116,7 @@ export function TaskCard({ task, projectId = "", orgId = "", callerRole = "", cu
         members={members}
         open={detailOpen}
         onOpenChange={setDetailOpen}
+        isArchived={isArchived}
       />
     </>
   );

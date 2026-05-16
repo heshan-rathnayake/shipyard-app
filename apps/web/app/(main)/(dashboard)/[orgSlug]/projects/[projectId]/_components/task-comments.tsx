@@ -29,6 +29,7 @@ interface TaskCommentsProps {
   callerRole: string;
   currentMemberId: string;
   members: Member[];
+  isArchived?: boolean;
 }
 
 /**
@@ -66,6 +67,7 @@ export function TaskComments({
   callerRole,
   currentMemberId,
   members,
+  isArchived = false,
 }: TaskCommentsProps) {
   const canManage = callerRole === "OWNER" || callerRole === "ADMIN";
   const [content, setContent] = useState("");
@@ -267,8 +269,8 @@ export function TaskComments({
         <p className="text-sm text-muted-foreground">No comments yet.</p>
       )}
 
-      {/* New comment input — hidden for VIEWERs */}
-      {callerRole !== "VIEWER" && (
+      {/* New comment input — hidden for VIEWERs and on archived projects */}
+      {callerRole !== "VIEWER" && !isArchived && (
         <div className="space-y-2">
           <div className="relative">
             {/* Mention dropdown — floats above the textarea */}

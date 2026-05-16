@@ -23,6 +23,7 @@ interface KanbanColumnProps {
   orgId: string;
   callerRole: string;
   currentMemberId: string;
+  isArchived?: boolean;
   members: Member[];
 }
 
@@ -34,6 +35,7 @@ export function KanbanColumn({
   orgId,
   callerRole,
   currentMemberId,
+  isArchived = false,
   members,
 }: KanbanColumnProps) {
   const [createOpen, setCreateOpen] = useState(false);
@@ -50,15 +52,17 @@ export function KanbanColumn({
             {tasks.length}
           </Badge>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="size-7 p-0"
-          onClick={() => setCreateOpen(true)}
-        >
-          <Plus className="size-4" />
-          <span className="sr-only">Add task</span>
-        </Button>
+        {!isArchived && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="size-7 p-0"
+            onClick={() => setCreateOpen(true)}
+          >
+            <Plus className="size-4" />
+            <span className="sr-only">Add task</span>
+          </Button>
+        )}
       </div>
 
       {/* Droppable area */}
@@ -81,21 +85,24 @@ export function KanbanColumn({
               callerRole={callerRole}
               currentMemberId={currentMemberId}
               members={members}
+              isArchived={isArchived}
             />
           ))}
         </SortableContext>
 
         {/* Empty drop zone at the bottom — always provides a landing area */}
-        <button
-          type="button"
-          onClick={() => setCreateOpen(true)}
-          className={`mt-auto flex items-center justify-center gap-1.5 rounded-md border border-dashed py-2 text-xs text-muted-foreground transition-colors hover:border-muted-foreground/50 hover:text-muted-foreground/80 ${
-            tasks.length === 0 ? "min-h-16" : "min-h-8"
-          }`}
-        >
-          <Plus className="size-3" />
-          Add task
-        </button>
+        {!isArchived && (
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className={`mt-auto flex items-center justify-center gap-1.5 rounded-md border border-dashed py-2 text-xs text-muted-foreground transition-colors hover:border-muted-foreground/50 hover:text-muted-foreground/80 ${
+              tasks.length === 0 ? "min-h-16" : "min-h-8"
+            }`}
+          >
+            <Plus className="size-3" />
+            Add task
+          </button>
+        )}
       </div>
 
       <CreateTaskDialog

@@ -37,6 +37,7 @@ interface KanbanBoardProps {
   orgId: string;
   callerRole: string;
   currentMemberId: string;
+  isArchived?: boolean;
   initialTasks: KanbanTask[];
   members: Member[];
 }
@@ -46,6 +47,7 @@ export function KanbanBoard({
   orgId,
   callerRole,
   currentMemberId,
+  isArchived = false,
   initialTasks,
   members,
 }: KanbanBoardProps) {
@@ -182,6 +184,7 @@ export function KanbanBoard({
             orgId={orgId}
             callerRole={callerRole}
             currentMemberId={currentMemberId}
+            isArchived={isArchived}
             members={members}
           />
         ))}

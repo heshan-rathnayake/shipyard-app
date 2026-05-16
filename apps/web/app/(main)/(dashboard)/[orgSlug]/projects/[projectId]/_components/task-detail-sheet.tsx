@@ -50,6 +50,7 @@ interface TaskDetailSheetProps {
   members: Member[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isArchived?: boolean;
 }
 
 const PRIORITIES: { value: TaskPriority; label: string }[] = [
@@ -68,6 +69,7 @@ export function TaskDetailSheet({
   members,
   open,
   onOpenChange,
+  isArchived = false,
 }: TaskDetailSheetProps) {
   const isMobile = useIsMobile();
   const { updateTask, removeTask } = useKanbanStore();
@@ -186,6 +188,7 @@ export function TaskDetailSheet({
                   setIsDirty(true);
                 }}
                 maxLength={255}
+                disabled={isArchived}
               />
             </div>
 
@@ -202,6 +205,7 @@ export function TaskDetailSheet({
                 rows={4}
                 placeholder="Add a description…"
                 className="resize-none"
+                disabled={isArchived}
               />
             </div>
 
@@ -215,6 +219,7 @@ export function TaskDetailSheet({
                     setPriority(v as TaskPriority);
                     setIsDirty(true);
                   }}
+                  disabled={isArchived}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -239,6 +244,7 @@ export function TaskDetailSheet({
                     setDueDate(e.target.value);
                     setIsDirty(true);
                   }}
+                  disabled={isArchived}
                 />
               </div>
             </div>
@@ -252,6 +258,7 @@ export function TaskDetailSheet({
                   setAssigneeId(v);
                   setIsDirty(true);
                 }}
+                disabled={isArchived}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Unassigned" />
@@ -278,7 +285,7 @@ export function TaskDetailSheet({
               </Select>
             </div>
 
-            {isDirty && (
+            {isDirty && !isArchived && (
               <Button
                 onClick={handleSave}
                 disabled={update.isPending || !title.trim()}
@@ -300,10 +307,11 @@ export function TaskDetailSheet({
               callerRole={callerRole}
               currentMemberId={currentMemberId}
               members={members}
+              isArchived={isArchived}
             />
           </div>
 
-          {canDelete && (
+          {canDelete && !isArchived && (
             <SheetFooter className="px-4 pb-4">
               <Button
                 variant="destructive"
