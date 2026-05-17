@@ -3,8 +3,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@shipyard/ui/components/sidebar";
+import { Separator } from "@shipyard/ui/components/separator";
 import { TooltipProvider } from "@shipyard/ui/components/tooltip";
 import { AppSidebar } from "./_components/app-sidebar";
+import { BreadcrumbProvider } from "@/src/providers/breadcrumb-provider";
+import { AppBreadcrumb } from "@/src/components/app-breadcrumb";
 
 // Auth is read here for display only — redirects live in page.tsx per convention
 export default function DashboardLayout({
@@ -17,28 +20,32 @@ export default function DashboardLayout({
       <SidebarProvider className="h-svh overflow-hidden">
         <AppSidebar />
         <SidebarInset className="overflow-y-auto">
-          <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
-            <SidebarTrigger className="-ml-1" />
-          </header>
-          <main
-            className="relative flex-1 p-6"
-            style={{
-              background:
-                "linear-gradient(to top, oklch(50.8% 0.118 165.612 / 0.04) 0%, transparent 60%)",
-            }}
-          >
-            <div
+          <BreadcrumbProvider>
+            <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
+              <SidebarTrigger className="-ml-1 min-w-9" />
+              <Separator orientation="vertical" className="mr-2 h-full" />
+              <AppBreadcrumb />
+            </header>
+            <main
+              className="relative flex-1 p-6"
               style={{
-                position: "absolute",
-                inset: 0,
-                pointerEvents: "none",
-                backgroundImage:
-                  "linear-gradient(rgba(0, 150, 137,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 150, 137,0.02) 1px, transparent 1px)",
-                backgroundSize: "5px 5px",
+                background:
+                  "linear-gradient(to top, oklch(50.8% 0.118 165.612 / 0.04) 0%, transparent 60%)",
               }}
-            />
-            {children}
-          </main>
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  backgroundImage:
+                    "linear-gradient(rgba(0, 150, 137,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 150, 137,0.02) 1px, transparent 1px)",
+                  backgroundSize: "5px 5px",
+                }}
+              />
+              {children}
+            </main>
+          </BreadcrumbProvider>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

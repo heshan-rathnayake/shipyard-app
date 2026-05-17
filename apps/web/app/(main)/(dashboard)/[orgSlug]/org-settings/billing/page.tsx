@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { db } from "@shipyard/db";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
+import { BreadcrumbSetter } from "@/src/components/breadcrumb-setter";
 import { fetchPriceDetails } from "@/server/stripe";
 import { PROJECT_LIMITS, MEMBER_LIMITS } from "@shipyard/api/config/plans";
 import { BillingCard } from "./_components/billing-card";
@@ -44,7 +45,9 @@ export default async function BillingPage({
   const memberLimit = MEMBER_LIMITS[tier];
 
   return (
-    <BillingCard
+    <>
+      <BreadcrumbSetter labels={{ [orgSlug]: organization.name }} />
+      <BillingCard
       orgId={orgId}
       orgSlug={orgSlug}
       orgName={organization.name}
@@ -65,6 +68,7 @@ export default async function BillingPage({
         members: { used: memberCount, limit: memberLimit },
       }}
     />
+    </>
   );
 }
 

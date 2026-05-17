@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@shipyard/db";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
+import { BreadcrumbSetter } from "@/src/components/breadcrumb-setter";
 import { KanbanBoard } from "./_components/kanban-board";
 import { ArchivedProjectBanner } from "./_components/archived-project-banner";
 import { ProjectHeader } from "./_components/project-header";
@@ -62,6 +63,7 @@ export default async function ProjectBoardPage({
 
   return (
     <div className="flex flex-col gap-4 h-full">
+      <BreadcrumbSetter labels={{ [orgSlug]: organization.name, [projectId]: project.name }} />
       {/* Back link + header */}
       <ProjectHeader
         projectId={projectId}

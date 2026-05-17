@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
+import { BreadcrumbSetter } from "@/src/components/breadcrumb-setter";
 import { WebhookEventsTable } from "./_components/webhook-events-table";
 
 export const metadata: Metadata = { title: "Webhooks" };
@@ -20,6 +21,7 @@ export default async function WebhooksPage({
 
   return (
     <div className="space-y-6">
+      <BreadcrumbSetter labels={{ [orgSlug]: membership.organization.name }} />
       <div>
         <h2 className="text-base font-semibold">Webhook events</h2>
         <p className="text-sm text-muted-foreground">

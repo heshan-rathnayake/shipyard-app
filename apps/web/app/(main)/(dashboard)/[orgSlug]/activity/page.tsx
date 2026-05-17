@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { db } from "@shipyard/db";
 import { Separator } from "@shipyard/ui/components/separator";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
+import { BreadcrumbSetter } from "@/src/components/breadcrumb-setter";
 import { ActivityLogTable } from "./_components/activity-log-table";
 
 export const metadata: Metadata = { title: "Activity" };
@@ -54,15 +55,7 @@ export default async function ActivityPage({
 
   return (
     <div className="space-y-6 max-w-6xl">
-      {/* Back link */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="size-4" />
-        Dashboard
-      </Link>
-
+      <BreadcrumbSetter labels={{ [orgSlug]: organization.name }} />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Activity</h1>

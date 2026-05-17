@@ -2,8 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { trpc } from "@/src/providers/trpc-react-provider";
 
 interface ProjectHeaderProps {
@@ -76,14 +74,6 @@ export function ProjectHeader({
 
   return (
     <div className="space-y-1 shrink-0">
-      <Link
-        href={`/${orgSlug}/projects${isArchived ? "?archived=true" : ""}`}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="size-4" />
-        Projects
-      </Link>
-
       {/* Project name */}
       {editingName ? (
         <input
@@ -92,8 +82,14 @@ export function ProjectHeader({
           onChange={(e) => setName(e.target.value)}
           onBlur={saveName}
           onKeyDown={(e) => {
-            if (e.key === "Enter") { e.preventDefault(); saveName(); }
-            if (e.key === "Escape") { setName(initialName); setEditingName(false); }
+            if (e.key === "Enter") {
+              e.preventDefault();
+              saveName();
+            }
+            if (e.key === "Escape") {
+              setName(initialName);
+              setEditingName(false);
+            }
           }}
           maxLength={100}
           className="w-full text-xl font-bold tracking-tight bg-transparent border-b border-border focus:border-foreground outline-none pb-0.5"
@@ -116,8 +112,14 @@ export function ProjectHeader({
           onChange={(e) => setDescription(e.target.value)}
           onBlur={saveDesc}
           onKeyDown={(e) => {
-            if (e.key === "Escape") { setDescription(initialDescription ?? ""); setEditingDesc(false); }
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveDesc(); }
+            if (e.key === "Escape") {
+              setDescription(initialDescription ?? "");
+              setEditingDesc(false);
+            }
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              saveDesc();
+            }
           }}
           maxLength={500}
           rows={2}

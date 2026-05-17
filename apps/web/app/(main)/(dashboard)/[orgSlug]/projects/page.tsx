@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { db } from "@shipyard/db";
 import { Separator } from "@shipyard/ui/components/separator";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
+import { BreadcrumbSetter } from "@/src/components/breadcrumb-setter";
 import { CreateProjectDialog } from "./_components/create-project-dialog";
 import { ProjectCard } from "./_components/project-card";
 import { PROJECT_LIMITS } from "@shipyard/api/config/plans";
@@ -53,15 +53,7 @@ export default async function ProjectsPage({
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Back link */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="size-4" />
-        Dashboard
-      </Link>
-
+      <BreadcrumbSetter labels={{ [orgSlug]: organization.name }} />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
