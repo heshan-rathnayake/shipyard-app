@@ -1,159 +1,139 @@
-# Turborepo starter
+# Shipyard
 
-This Turborepo starter is maintained by the Turborepo core team.
+A full-stack project management SaaS built as a Turborepo monorepo. Teams can create organisations, manage projects on a Kanban board, collaborate in real time, and subscribe to paid plans via Stripe.
 
-## Using this example
+## Apps and packages
 
-Run the following command:
+### Apps
 
-```sh
-npx create-turbo@latest
-```
+| App           | Package name       | Description                                                         |
+| ------------- | ------------------ | ------------------------------------------------------------------- |
+| `apps/web`    | `@shipyard/web`    | Next.js 15 web application — auth, dashboard, Kanban board, billing |
+| `apps/socket` | `@shipyard/socket` | Express + Socket.io server — real-time task and presence events     |
 
-## What's inside?
+### Packages
 
-This Turborepo includes the following packages/apps:
+| Package                      | Name                          | Description                                                  |
+| ---------------------------- | ----------------------------- | ------------------------------------------------------------ |
+| `packages/api`               | `@shipyard/api`               | tRPC routers, procedures, and all server-side business logic |
+| `packages/db`                | `@shipyard/db`                | Prisma client, multi-file schema, and database migrations    |
+| `packages/email`             | `@shipyard/email`             | React Email templates and Resend sending helper              |
+| `packages/logger`            | `@shipyard/logger`            | Shared tslog logger instance                                 |
+| `packages/types`             | `@shipyard/types`             | Shared TypeScript types and interfaces                       |
+| `packages/ui`                | `@shipyard/ui`                | Component library — Radix UI + shadcn/ui, Tailwind CSS       |
+| `packages/testing`           | `@shipyard/testing`           | Vitest config and shared test factories                      |
+| `packages/typescript-config` | `@shipyard/typescript-config` | Shared `tsconfig.json` bases                                 |
 
-### Apps and Packages
+## Tech stack
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@shipyard/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@shipyard/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@shipyard/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- **Framework** — Next.js 15, React 19
+- **API** — tRPC 11 with React Query
+- **Database** — PostgreSQL 18 via Prisma 7
+- **Auth** — NextAuth.js v5 (Google, GitHub OAuth + email/password)
+- **Real-time** — Socket.io
+- **Styling** — Tailwind CSS 4, shadcn/ui, Radix UI
+- **Payments** — Stripe
+- **Email** — React Email + Resend
+- **State** — Zustand
+- **Linting/Formatting** — Biome
+- **Package manager** — Yarn 4 (Berry)
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Prerequisites
 
-### Utilities
+- Node.js ≥ 22
+- Yarn 4 (`corepack enable`)
+- Docker (for PostgreSQL and MailHog in development)
 
-This Turborepo has some additional tools already setup for you:
+## Getting started
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-yarn exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+### 1. Install dependencies
 
 ```sh
-turbo build --filter=docs
+yarn install
 ```
 
-Without global `turbo`:
+### 2. Set up environment variables
+
+Copy the example files and fill in values:
 
 ```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-yarn exec turbo build --filter=docs
+cp .env.example .env
+cp apps/web/.env.local.example apps/web/.env.local
+cp packages/db/.env.example packages/db/.env
+cp apps/socket/.env.example apps/socket/.env
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+### 3. Start infrastructure
 
 ```sh
-cd my-turborepo
-turbo dev
+docker compose up -d
 ```
 
-Without global `turbo`, use your package manager:
+This starts:
+
+- **PostgreSQL 18** on port `5432`
+- **MailHog** SMTP on port `1025`, web UI on port `8025`
+
+
+### 4. Run database migrations
 
 ```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-yarn exec turbo dev
+yarn workspace @shipyard/db prisma migrate dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+### 5. Start the development servers
 
 ```sh
-turbo dev --filter=web
+yarn dev
 ```
 
-Without global `turbo`:
+This runs `web` (port 3000) and `socket` in parallel via Turborepo.
+
+## Common commands
 
 ```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-yarn exec turbo dev --filter=web
+# Development
+yarn dev                          # Start all apps
+yarn workspace @shipyard/web dev  # Start only the web app
+
+# Building
+yarn build                        # Build all packages and apps
+
+# Type checking
+yarn check-types
+
+# Linting / formatting
+yarn lint
+yarn format
+
+# Testing
+yarn test                         # Run all unit tests
+yarn workspace @shipyard/api test # Run API unit tests only
+yarn workspace @shipyard/web test # Run web unit tests only
+
+# Database
+yarn workspace @shipyard/db prisma migrate dev    # Apply migrations
+yarn workspace @shipyard/db prisma studio         # Open Prisma Studio
+yarn workspace @shipyard/db prisma generate       # Regenerate client after schema changes
 ```
 
-### Remote Caching
+## Project structure
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
 ```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-yarn exec turbo login
+shipyard/
+├── apps/
+│   ├── web/          # Next.js application
+│   └── socket/       # Socket.io server
+├── packages/
+│   ├── api/          # tRPC routers and business logic
+│   ├── db/           # Prisma schema and client
+│   ├── email/        # Email templates
+│   ├── logger/       # Shared logger
+│   ├── types/        # Shared types
+│   ├── ui/           # Component library
+│   ├── testing/      # Test utilities
+│   └── typescript-config/
+├── docker-compose.yml
+├── turbo.json
+└── package.json
 ```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-yarn exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)

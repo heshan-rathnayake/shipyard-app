@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# @shipyard/web
 
-## Getting Started
+The Next.js web application for Shipyard. Handles authentication, the organisation dashboard, Kanban project boards, billing, activity feeds, and all user-facing UI.
 
-First, run the development server:
+## Tech stack
 
-```bash
-npm run dev
-# or
+- **Next.js 15** (App Router) with React 19
+- **tRPC 11** + **React Query 5** for type-safe API calls
+- **NextAuth.js v5** — Google OAuth, GitHub OAuth, email/password
+- **Prisma 7** via `@shipyard/db` for database access
+- **Zustand 5** for client-side state (Kanban board, org store)
+- **Tailwind CSS 4** + **shadcn/ui** + **Radix UI** for styling and components
+- **@dnd-kit** for drag-and-drop on the Kanban board
+- **Socket.io client** for real-time collaboration
+- **Stripe** for subscription billing
+- **Vitest** for unit testing
+
+## Development
+
+From the monorepo root:
+
+```sh
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To run only this app:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+yarn workspace @shipyard/web dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Environment variables
 
-To learn more about Next.js, take a look at the following resources:
+Create `apps/web/.env.local` with the following:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+# App
+NEXTAUTH_URL=http://localhost:3000
+AUTH_SECRET=                        # openssl rand -hex 32
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Database
+DATABASE_URL=postgresql://...
 
-## Deploy on Vercel
+# OAuth providers
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Email (Resend)
+RESEND_API_KEY=
+EMAIL_FROM=
+
+# Socket server
+NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+SOCKET_SECRET=
+```
+
+## Project structure
+
+```
+apps/web/
+├── app/
+│   ├── (auth)/              # Sign-in, sign-up, forgot password pages
+│   ├── (main)/
+│   │   ├── (dashboard)/     # Protected dashboard layout
+│   │   │   ├── dashboard/   # Organisation overview
+│   │   │   ├── [orgSlug]/
+│   │   │   │   ├── projects/          # Project list (active + archived)
+│   │   │   │   │   └── [projectId]/   # Kanban board
+│   │   │   │   ├── activity/          # Organisation activity log
+│   │   │   │   ├── members/           # Member management
+│   │   │   │   └── org-settings/          # Org settings and billing
+│   │   │   └── _components/           # Sidebar, nav, org-switcher
+│   │   └── api/             # Next.js route handlers (tRPC, auth, webhooks)
+│   └── globals.css
+├── lib/                     # Pure utility functions (toSlugPreview, userInitials, etc.)
+├── server/                  # Server-only helpers (session, org membership guards)
+├── src/
+│   ├── components/          # Shared client components (ConfirmDialog, etc.)
+│   ├── hooks/               # Custom React hooks
+│   ├── providers/           # tRPC, Socket, theme providers
+│   └── stores/              # Zustand stores (kanban, org)
+└── public/
+```
+
+## Key commands
+
+```sh
+# Type check
+yarn workspace @shipyard/web check-types
+
+# Lint
+yarn workspace @shipyard/web lint
+
+# Unit tests
+yarn workspace @shipyard/web test
+yarn workspace @shipyard/web test:watch
+```
+
+## Building for production
+
+```sh
+yarn workspace @shipyard/web build
+```
+
+The build requires all workspace packages (`@shipyard/api`, `@shipyard/db`, `@shipyard/ui`, etc.) to be built first. Running `yarn build` from the monorepo root handles this automatically via Turborepo.
