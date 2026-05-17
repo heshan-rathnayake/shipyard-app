@@ -57,6 +57,7 @@ export async function AppSidebar() {
             email: session.user.email,
             image: session.user.image,
           }}
+          orgs={orgs}
         />
       </SidebarFooter>
       <SidebarRail />

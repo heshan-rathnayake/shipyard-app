@@ -3,7 +3,6 @@
 import * as React from "react";
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
   CreditCard,
   LogOut,
@@ -14,6 +13,8 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import type { SubscriptionTier } from "@shipyard/db/enum";
 import {
   Avatar,
   AvatarFallback,
@@ -36,6 +37,14 @@ import {
 } from "@shipyard/ui/components/sidebar";
 import { Skeleton } from "@shipyard/ui/components/skeleton";
 import { userInitials } from "@/lib/userInitials";
+import { useOrgStore } from "@/src/stores/org-store";
+
+interface Org {
+  id: string;
+  name: string;
+  slug: string;
+  subscriptionTier: SubscriptionTier;
+}
 
 interface NavUserProps {
   user: {
@@ -43,7 +52,10 @@ interface NavUserProps {
     email?: string | null;
     image?: string | null;
   };
+  orgs: Org[];
 }
+
+// ─── Theme cycling ────────────────────────────────────────────────────────────
 
 const themeOrder = ["system", "light", "dark"] as const;
 type Theme = (typeof themeOrder)[number];
@@ -58,14 +70,22 @@ const themeLabel: Record<Theme, string> = {
   dark: "Dark",
 };
 
-export function NavUser({ user }: NavUserProps) {
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function NavUser({ user, orgs }: NavUserProps) {
   const { isMobile } = useSidebar();
+  const router = useRouter();
   const initials = userInitials(user.name, user.email);
-
   const { theme, setTheme } = useTheme();
-
   const [mounted, setMounted] = React.useState(false);
+
   React.useEffect(() => setMounted(true), []);
+
+  // Read active org from the persisted store — same source as OrgSwitcher.
+  // Safe to read after mount: localStorage has been synced to the store by then.
+  const { activeOrgSlug } = useOrgStore();
+  const activeOrg = orgs.find((o) => o.slug === activeOrgSlug) ?? orgs[0];
+  const isFree = activeOrg?.subscriptionTier === "FREE";
 
   if (!mounted) {
     return (
@@ -87,6 +107,7 @@ export function NavUser({ user }: NavUserProps) {
     themeOrder.includes(theme as Theme) ? theme : "system"
   ) as Theme;
   const ThemeIcon = themeIcon[currentTheme];
+
   function cycleTheme() {
     const idx = themeOrder.indexOf(currentTheme);
     setTheme(themeOrder[(idx + 1) % themeOrder.length]!);
@@ -101,9 +122,9 @@ export function NavUser({ user }: NavUserProps) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="h-8 w-8 rounded-full">
                 <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
-                <AvatarFallback className="rounded-lg">
+                <AvatarFallback className="rounded-full">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -121,11 +142,12 @@ export function NavUser({ user }: NavUserProps) {
             align="end"
             sideOffset={4}
           >
+            {/* User identity */}
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="h-8 w-8 rounded-full">
                   <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className="rounded-full">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -138,28 +160,39 @@ export function NavUser({ user }: NavUserProps) {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+            {/* Upgrade to Pro — only shown on the FREE plan */}
+            {isFree && activeOrg && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      router.push(`/${activeOrg.slug}/org-settings/billing`)
+                    }
+                  >
+                    <Sparkles />
+                    Upgrade to Pro
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
 
-            <DropdownMenuSeparator />
-
+            {/* Account & billing */}
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => router.push("/settings")}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
+              {activeOrg && (
+                <DropdownMenuItem
+                  onSelect={() =>
+                    router.push(`/${activeOrg.slug}/org-settings/billing`)
+                  }
+                >
+                  <CreditCard />
+                  Billing
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
