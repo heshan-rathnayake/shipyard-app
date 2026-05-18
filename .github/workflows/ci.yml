@@ -1,0 +1,211 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ── Shared env available to every job ─────────────────────────────────────────
+env:
+  NODE_VERSION: "22"
+  # Vercel Remote Cache — dramatically speeds up repeated runs by sharing
+  # Turbo task outputs across runners and branches.
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+# ── Reusable setup steps are kept DRY via a composite or just repeated.
+# Three jobs run in parallel where possible, creating a clear dependency graph
+# visible in the GitHub UI (quality → test → build).
+# ──────────────────────────────────────────────────────────────────────────────
+
+jobs:
+  # ── 1. Code quality: lint + type-check ──────────────────────────────────────
+  # Fast gate — catches style and type errors before expensive steps run.
+  # Both tasks run in parallel inside Turbo (neither depends on the other).
+  quality:
+    name: Quality (Lint & Type-check)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Get Yarn cache path
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Restore Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Restore Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-quality-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-quality-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      # Fails the job on any high or critical severity vulnerability found
+      # across all workspaces — catches issues before they reach deployment.
+      - name: Audit dependencies
+        run: yarn npm audit --all --recursive --severity high
+
+      - name: Generate Prisma Client
+        run: yarn workspace @shipyard/db db:generate
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Type-check
+        run: yarn check-types
+
+  # ── 2. Tests ─────────────────────────────────────────────────────────────────
+  # Runs after quality passes. `test` depends on `^build` in turbo.json so
+  # Turbo auto-builds workspace packages before running test suites.
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: quality
+
+    env:
+      # Dummy values — no real DB or external services needed.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shipyard_ci
+      AUTH_SECRET: ci-auth-secret-placeholder-32-chars-min
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_SOCKET_URL: http://localhost:4000
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder
+      STRIPE_PRO_PRICE_ID: price_placeholder
+      SOCKET_SECRET: ci-socket-secret-placeholder
+      EMAIL_FROM: "Shipyard <noreply@shipyard.dev>"
+      EMAIL_HOST: localhost
+      EMAIL_PORT: "1025"
+      RESEND_API_KEY: re_placeholder
+      CRON_SECRET: ci-cron-secret-placeholder
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Get Yarn cache path
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Restore Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Restore Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-test-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-test-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Generate Prisma Client
+        run: yarn workspace @shipyard/db db:generate
+
+      - name: Test
+        run: yarn test
+
+  # ── 3. Production build ───────────────────────────────────────────────────────
+  # Runs after quality passes (parallel with test). Verifies the full monorepo
+  # builds cleanly with production-shaped env vars. The actual Vercel/Railway
+  # builds run separately on deploy — this step is a pre-merge safety net.
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: quality
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shipyard_ci
+      AUTH_SECRET: ci-auth-secret-placeholder-32-chars-min
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_SOCKET_URL: http://localhost:4000
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder
+      STRIPE_PRO_PRICE_ID: price_placeholder
+      SOCKET_SECRET: ci-socket-secret-placeholder
+      EMAIL_FROM: "Shipyard <noreply@shipyard.dev>"
+      EMAIL_HOST: localhost
+      EMAIL_PORT: "1025"
+      RESEND_API_KEY: re_placeholder
+      CRON_SECRET: ci-cron-secret-placeholder
+      GOOGLE_CLIENT_ID: placeholder
+      GOOGLE_CLIENT_SECRET: placeholder
+      GITHUB_CLIENT_ID: placeholder
+      GITHUB_CLIENT_SECRET: placeholder
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Get Yarn cache path
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Restore Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Restore Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-build-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-turbo-build-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Generate Prisma Client
+        run: yarn workspace @shipyard/db db:generate
+
+      - name: Build
+        run: yarn build

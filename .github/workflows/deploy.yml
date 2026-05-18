@@ -1,0 +1,127 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Never cancel an in-flight deployment — let it finish or fail cleanly.
+# A new push queues behind the running deploy rather than killing it mid-flight.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # ── 1. Database migrations ───────────────────────────────────────────────────
+  # Always runs first. If migrations fail the deploy is aborted — the app
+  # is never updated to code that expects a schema that doesn't exist yet.
+  # Uses the `production` GitHub Environment so the job requires any configured
+  # protection rules (e.g. required reviewers) before it can access secrets.
+  migrate:
+    name: Database Migrations
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Get Yarn cache path
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Restore Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Generate Prisma Client
+        run: yarn workspace @shipyard/db db:generate
+
+      # `migrate deploy` applies pending migrations without prompting and
+      # never resets data — safe for production. `migrate dev` is local-only.
+      - name: Apply pending migrations
+        run: cd packages/db && node_modules/.bin/prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  # ── 2. Deploy socket server ──────────────────────────────────────────────────
+  # Runs only after migrations succeed. The socket server is deployed to
+  # Railway — it requires a persistent process for Socket.io WebSocket
+  # connections, which rules out serverless platforms like Vercel.
+  #
+  # Only triggers when files that affect the socket server actually change,
+  # avoiding unnecessary deploys on frontend-only commits.
+  deploy-socket:
+    name: Deploy Socket Server → Railway
+    runs-on: ubuntu-latest
+    needs: migrate
+    environment: production
+
+    # Skip this job if no socket-relevant files changed.
+    # Note: `needs: migrate` still ran above — migrations always apply
+    # regardless of which files changed.
+    if: |
+      contains(github.event.head_commit.modified, 'apps/socket/') ||
+      contains(github.event.head_commit.modified, 'packages/db/') ||
+      contains(github.event.head_commit.modified, 'packages/types/') ||
+      contains(github.event.head_commit.modified, 'packages/logger/')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        # `--detach` returns immediately after triggering the deploy.
+        # Railway streams build logs in its own dashboard.
+        run: npx @railway/cli@latest up --service ${{ vars.RAILWAY_SOCKET_SERVICE }} --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # Poll the socket server's /health endpoint until it responds 200,
+      # or fail the job after a timeout. Gives Railway time to swap instances.
+      - name: Wait for health check
+        run: |
+          echo "Waiting for socket server to become healthy..."
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ vars.SOCKET_HEALTH_URL }}/health" || echo "000")
+            echo "Attempt $i/12 — HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Socket server is healthy."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Health check timed out after 120s."
+          exit 1
+
+  # ── 3. Notify on failure ─────────────────────────────────────────────────────
+  # Sends a summary to the configured webhook if any deploy job fails.
+  # Uses `if: failure()` so it runs even when upstream jobs are cancelled/failed.
+  notify-failure:
+    name: Notify on failure
+    runs-on: ubuntu-latest
+    needs: [migrate, deploy-socket]
+    if: failure()
+
+    steps:
+      - name: Send failure notification
+        run: |
+          curl -s -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "❌ *Shipyard deploy failed* on `${{ github.ref_name }}`\nCommit: `${{ github.sha }}`\nBy: ${{ github.actor }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }'
+
