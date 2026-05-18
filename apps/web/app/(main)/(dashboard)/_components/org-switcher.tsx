@@ -99,7 +99,7 @@ export function OrgSwitcher({
       <SidebarMenu>
         <SidebarMenuItem>
           <div className="flex items-center gap-2 px-2 py-1.5 min-h-12">
-            <Skeleton className="size-8 rounded-lg shrink-0" />
+            <Skeleton className="size-8 rounded-full shrink-0" />
             <div className="flex-1 space-y-1.5">
               <Skeleton className="h-3 w-28" />
               <Skeleton className="h-2.5 w-16" />
@@ -126,7 +126,7 @@ export function OrgSwitcher({
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                   <OrgInitials name={activeOrg.name} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -155,7 +155,7 @@ export function OrgSwitcher({
                   onClick={() => handleOrgChange(org.slug)}
                   className="gap-2 p-2"
                 >
-                  <div className="flex size-6 items-center justify-center rounded-md border bg-sidebar-primary text-sidebar-primary-foreground">
+                  <div className="flex size-6 items-center justify-center rounded-full border bg-sidebar-primary text-sidebar-primary-foreground">
                     <OrgInitials name={org.name} />
                   </div>
                   {org.name}
