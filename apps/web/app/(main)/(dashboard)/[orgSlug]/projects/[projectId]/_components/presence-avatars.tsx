@@ -30,6 +30,9 @@ export function PresenceAvatars({ users }: PresenceAvatarsProps) {
               <Image
                 src={u.image}
                 alt={u.name ?? ""}
+                width={28}
+                height={28}
+                unoptimized
                 referrerPolicy="no-referrer"
                 className="size-full object-cover"
               />
