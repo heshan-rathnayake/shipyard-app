@@ -3668,11 +3668,15 @@ __metadata:
     "@prisma/adapter-pg": "npm:^7.8.0"
     "@prisma/client": "npm:^7.0.0"
     "@shipyard/typescript-config": "npm:*"
+    "@types/bcryptjs": "npm:^2"
     "@types/node": "npm:^22"
     "@types/pg": "npm:^8"
+    bcryptjs: "npm:^2"
     dotenv: "npm:^16.3.1"
     pg: "npm:^8.20.0"
     prisma: "npm:^7.0.0"
+    stripe: "npm:^22"
+    tsx: "npm:^4"
     typescript: "npm:5.9.2"
   languageName: unknown
   linkType: soft
@@ -4180,6 +4184,13 @@ __metadata:
   dependencies:
     tslib: "npm:^2.4.0"
   checksum: 10c0/b255094f293794c6d2289300c5fbcafbb5532a3aed3a5ffd2f8dc1828e639b88d75f6a376dd8f94347a44813fd7a7149d8463477a9a49525c8b2dcaa38c2d1e8
+  languageName: node
+  linkType: hard
+
+"@types/bcryptjs@npm:^2":
+  version: 2.4.6
+  resolution: "@types/bcryptjs@npm:2.4.6"
+  checksum: 10c0/1182663f0c081c5c58760019459cd309335e9b5fc6552780b0fd21b6c5f25661a844709e46218796f4bdbebe6736e11cfc5af0729bc2cdb0160943650aceb3da
   languageName: node
   linkType: hard
 
@@ -4745,6 +4756,13 @@ __metadata:
   bin:
     bcrypt: bin/bcrypt
   checksum: 10c0/127c94699f07eab5fbbb89d600c3f0e36ae6fd001e028139740b41fffb62a23a2743523fb88f442ae3308a27d4843b97ccb9e436d78f5c5899be187d0972c6d5
+  languageName: node
+  linkType: hard
+
+"bcryptjs@npm:^2":
+  version: 2.4.3
+  resolution: "bcryptjs@npm:2.4.3"
+  checksum: 10c0/b969467087ed7a01ff905a1c6a0c45014ec586248a448ea08370c8ed8bb314bda16a870ca23e0961d7d23bdce1a04c76fa70a9d680be814fa9ac7d8fc61870a3
   languageName: node
   linkType: hard
 
@@ -5747,7 +5765,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.28.0":
+"esbuild@npm:^0.28.0, esbuild@npm:~0.28.0":
   version: 0.28.0
   resolution: "esbuild@npm:0.28.0"
   dependencies:
@@ -9457,7 +9475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stripe@npm:^22.1.1":
+"stripe@npm:^22, stripe@npm:^22.1.1":
   version: 22.1.1
   resolution: "stripe@npm:22.1.1"
   peerDependencies:
@@ -9773,6 +9791,21 @@ __metadata:
     tsup: dist/cli-default.js
     tsup-node: dist/cli-node.js
   checksum: 10c0/86b0a5ee5533cf5363431ffaf6a244d06fbc80e3a739f216a121a336b28e663d521bae1d3b2d9ba7d479cb4b5f7dcb5e0722e169d3daf664c78f0d68676fa06a
+  languageName: node
+  linkType: hard
+
+"tsx@npm:^4":
+  version: 4.22.2
+  resolution: "tsx@npm:4.22.2"
+  dependencies:
+    esbuild: "npm:~0.28.0"
+    fsevents: "npm:~2.3.3"
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    tsx: dist/cli.mjs
+  checksum: 10c0/5e9a9b5577642b6084bac14450379bdb72567a9bf47b3508470f3ccd530693358ab0c5eb86c57c249260f2ffa0549e2e4cedc93cbe526bbae5ef4d215e1d57a3
   languageName: node
   linkType: hard
 
