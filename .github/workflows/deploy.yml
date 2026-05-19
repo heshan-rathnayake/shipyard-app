@@ -53,7 +53,7 @@ jobs:
       # `migrate deploy` applies pending migrations without prompting and
       # never resets data — safe for production. `migrate dev` is local-only.
       - name: Apply pending migrations
-        run: cd packages/db && node_modules/.bin/prisma migrate deploy
+        run: yarn workspace @shipyard/db exec prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
