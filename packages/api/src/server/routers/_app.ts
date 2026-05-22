@@ -4,6 +4,7 @@ import { commentRouter } from "./comment";
 import { memberRouter } from "./member";
 import { organizationRouter } from "./organization";
 import { projectRouter } from "./project";
+import { searchRouter } from "./search";
 import { socketRouter } from "./socket";
 import { subscriptionRouter } from "./subscription";
 import { taskRouter } from "./task";
@@ -17,6 +18,7 @@ export const appRouter = router({
   comment: commentRouter,
   socket: socketRouter,
   subscription: subscriptionRouter,
+  search: searchRouter,
 });
 
 export type AppRouter = typeof appRouter;
