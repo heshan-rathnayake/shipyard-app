@@ -3,7 +3,7 @@ import { Skeleton } from "@shipyard/ui/components/skeleton";
 
 export default function MembersLoading() {
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-1.5">

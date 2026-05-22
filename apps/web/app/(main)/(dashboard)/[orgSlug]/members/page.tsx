@@ -58,7 +58,7 @@ export default async function MembersPage({
     canManage && members.length >= MEMBER_LIMITS[organization.subscriptionTier];
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-3xl">
       <BreadcrumbSetter labels={{ [orgSlug]: organization.name }} />
       {/* Header */}
       <div className="flex items-center justify-between">
