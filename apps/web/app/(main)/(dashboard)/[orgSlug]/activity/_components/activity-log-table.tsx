@@ -53,7 +53,7 @@ export function ActivityLogTable({
   // activeCursor: the cursor to use for the next fetch (undefined = first page)
   // shouldFetch: gate that prevents the query from running automatically
   const [activeCursor, setActiveCursor] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [shouldFetch, setShouldFetch] = useState(false);
 
@@ -96,7 +96,7 @@ export function ActivityLogTable({
       search: debouncedSearch || undefined,
       entityType: entityType === "ALL" ? undefined : entityType,
     },
-    { enabled: shouldFetch }
+    { enabled: shouldFetch },
   );
 
   // ── Append loaded page ──────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ export function ActivityLogTable({
           setShouldFetch(true);
         }
       },
-      { rootMargin: "300px", threshold: 0 }
+      { rootMargin: "300px", threshold: 0 },
     );
 
     observer.observe(el);
@@ -176,7 +176,9 @@ export function ActivityLogTable({
   );
 
   const emptyState = isFetching ? (
-    <Loader message="Loading…" size={4} />
+    <div className="w-full flex items-center justify-center py-10">
+      <Loader message="Loading…" size={4} />
+    </div>
   ) : (
     <span>
       {search || entityType !== "ALL"
