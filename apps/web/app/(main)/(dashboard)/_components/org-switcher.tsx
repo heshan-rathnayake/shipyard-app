@@ -24,6 +24,7 @@ import * as React from "react";
 import { UpgradeDialog } from "@/src/components/upgrade-dialog";
 import { useOrgStore } from "@/src/stores/org-store";
 import { CreateOrgDialog } from "./create-org-dialog";
+import Image from "next/image";
 
 interface Org {
   id: string;
@@ -128,9 +129,13 @@ export function OrgSwitcher({
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
-                  <OrgInitials name={activeOrg.name} />
-                </div>
+                <Image
+                  src={`/logo.png`}
+                  alt={`${activeOrg.name} avatar`}
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{activeOrg.name}</span>
                   <span className="truncate text-xs">
