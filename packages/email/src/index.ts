@@ -164,3 +164,5 @@ export { renderTaskAssignedEmail } from "./templates/task-assigned";
 export type { VerifyEmailProps } from "./templates/verify-email";
 // Re-export templates so callers can import from one place
 export { renderVerifyEmail } from "./templates/verify-email";
+export type { ResetPasswordEmailProps } from "./templates/reset-password";
+export { renderResetPasswordEmail } from "./templates/reset-password";

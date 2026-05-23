@@ -24,6 +24,7 @@ export default async function LoginPage({
   searchParams: Promise<{
     error?: string;
     verified?: string;
+    reset?: string;
     callbackUrl?: string;
   }>;
 }) {
@@ -31,8 +32,9 @@ export default async function LoginPage({
   const session = await auth();
   if (session) redirect("/dashboard");
 
-  const { error, verified, callbackUrl } = await searchParams;
+  const { error, verified, reset, callbackUrl } = await searchParams;
   const isVerified = verified === "true";
+  const isReset = reset === "true";
   const errorMessage = error
     ? (AUTH_ERRORS[error] ?? "An unexpected error occurred. Please try again.")
     : null;
@@ -73,6 +75,12 @@ export default async function LoginPage({
               {isVerified && (
                 <p className="rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-center text-sm text-green-700 dark:text-green-400">
                   Email verified! You can now sign in.
+                </p>
+              )}
+
+              {isReset && (
+                <p className="rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-center text-sm text-green-700 dark:text-green-400">
+                  Password updated! Sign in with your new password.
                 </p>
               )}
 
