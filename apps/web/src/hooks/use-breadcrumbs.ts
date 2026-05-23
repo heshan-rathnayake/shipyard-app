@@ -12,6 +12,7 @@ const STATIC_LABELS: Record<string, string> = {
   activity: "Activity",
   settings: "Settings",
   "org-settings": "Settings",
+  general: "General",
   billing: "Billing",
   webhooks: "Webhooks",
 };

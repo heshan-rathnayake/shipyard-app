@@ -5,7 +5,7 @@ import { BreadcrumbSetter } from "@/src/components/breadcrumb-setter";
 import { DeleteOrgButton } from "./_components/delete-org-button";
 import { OrgNameForm } from "./_components/org-name-form";
 
-export const metadata: Metadata = { title: "General settings" };
+export const metadata: Metadata = { title: "General org settings" };
 
 export default async function GeneralSettingsPage({
   params,
