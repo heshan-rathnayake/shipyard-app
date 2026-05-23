@@ -8,6 +8,7 @@ import { searchRouter } from "./search";
 import { socketRouter } from "./socket";
 import { subscriptionRouter } from "./subscription";
 import { taskRouter } from "./task";
+import { userRouter } from "./user";
 
 export const appRouter = router({
   organization: organizationRouter,
@@ -19,6 +20,7 @@ export const appRouter = router({
   socket: socketRouter,
   subscription: subscriptionRouter,
   search: searchRouter,
+  user: userRouter,
 });
 
 export type AppRouter = typeof appRouter;

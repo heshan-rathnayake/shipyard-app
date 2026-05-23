@@ -157,6 +157,46 @@ export const organizationRouter = router({
       return org;
     }),
 
+  update: protectedProcedure
+    .input(
+      z.object({
+        orgId: z.string(),
+        name: z.string().min(2, "Name must be at least 2 characters").max(50),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const membership = await requireMembership(
+        ctx.db,
+        ctx.session.user.id,
+        input.orgId
+      );
+
+      if (membership.role !== "OWNER" && membership.role !== "ADMIN") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only owners and admins can update organization settings.",
+        });
+      }
+
+      const org = await ctx.db.organization.update({
+        where: { id: input.orgId },
+        data: { name: input.name },
+        select: { id: true, name: true, slug: true },
+      });
+
+      void logActivity({
+        db: ctx.db,
+        orgId: org.id,
+        memberId: membership.id,
+        action: ActivityAction.ORG_UPDATED,
+        entityType: EntityType.ORGANIZATION,
+        entityId: org.id,
+        metadata: { name: input.name },
+      });
+
+      return org;
+    }),
+
   delete: protectedProcedure
     .input(z.object({ orgId: z.string() }))
     .mutation(async ({ ctx, input }) => {
