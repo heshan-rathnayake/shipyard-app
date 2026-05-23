@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/src/components/theme-toggle";
 import { HeroShapes } from "@/src/components/hero-shapes";
+import { KanbanScrollPreview } from "@/src/components/kanban-scroll-preview";
 
 export const metadata: Metadata = {
   title: "Shipyard — Project management for dev teams",
@@ -127,7 +128,7 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative flex flex-col items-center overflow-hidden px-6 pb-32 pt-40 text-center">
+      <section className="relative flex flex-col items-center justify-center overflow-hidden px-6 pb-4 text-center  min-h-screen">
         {/* Animated floating shapes */}
         <HeroShapes />
         {/* Grid texture */}
@@ -206,51 +207,10 @@ export default function LandingPage() {
             Free for 1 project · No credit card required
           </p>
         </div>
-
-        {/* Mock UI preview */}
-        <div className="relative mx-auto mt-20 w-full max-w-6xl">
-          <div className="overflow-hidden rounded-xl border border-border bg-muted/30 shadow-2xl shadow-black/5 backdrop-blur-sm">
-            {/* Browser chrome */}
-            <div className="flex h-9 items-center gap-1.5 border-b border-border bg-muted/50 px-4">
-              <span className="size-2.5 rounded-full bg-muted-foreground/20" />
-              <span className="size-2.5 rounded-full bg-muted-foreground/20" />
-              <span className="size-2.5 rounded-full bg-muted-foreground/20" />
-              <span className="mx-auto rounded border border-border bg-background px-10 py-0.5 text-[10px] text-muted-foreground/60">
-                app.shipyard.dev
-              </span>
-            </div>
-            {/* Kanban preview — CSS toggle, no client component needed */}
-            <div className="relative overflow-hidden">
-              {/* Light mode */}
-              <Image
-                src="/kanban-preview-light.png"
-                alt="Kanban preview"
-                width={1200}
-                height={600}
-                className="block rounded-lg dark:hidden"
-              />
-              {/* Dark mode */}
-              <Image
-                src="/kanban-preview-dark.png"
-                alt="Kanban preview"
-                width={1200}
-                height={600}
-                className="hidden rounded-lg dark:block"
-              />
-              {/* Fade out right edge */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-linear-to-l from-background/60 to-transparent" />
-            </div>
-          </div>
-          {/* Bottom glow under the card */}
-          <div
-            className="pointer-events-none absolute -bottom-8 inset-x-0 h-16 blur-2xl"
-            style={{
-              background:
-                "radial-gradient(ellipse 60% 100% at 50% 100%, oklch(50.8% 0.118 165.612 / 0.12) 0%, transparent 70%)",
-            }}
-          />
-        </div>
       </section>
+
+      {/* ── Kanban scroll preview ─────────────────────────────────────────── */}
+      <KanbanScrollPreview />
 
       {/* ── Features ──────────────────────────────────────────────────────── */}
       <section id="features" className="px-6 pb-28">
