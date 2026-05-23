@@ -82,7 +82,7 @@ function ScrollCard({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="mx-auto h-104 w-full max-w-5xl overflow-hidden rounded-[24px] border-4 border-border/60 bg-zinc-900 p-1.5 shadow-2xl md:h-152 md:p-2"
+      className="mx-auto h-60 w-full max-w-5xl overflow-hidden rounded-[24px] border-4 border-border/60 bg-zinc-900 p-1.5 shadow-2xl md:h-136 md:p-2"
     >
       {/* Screen area */}
       <div className="h-full w-full overflow-hidden rounded-[18px]">

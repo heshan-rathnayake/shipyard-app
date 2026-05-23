@@ -27,16 +27,18 @@ export function KanbanScrollPreview() {
         <Image
           src="/kanban-preview-light.png"
           alt="Shipyard kanban board"
-          fill
-          className="object-cover object-top block dark:hidden"
+          width={1200}
+          height={800}
+          className="block dark:hidden"
           draggable={false}
           priority
         />
         <Image
           src="/kanban-preview-dark.png"
           alt="Shipyard kanban board"
-          fill
-          className="object-cover object-top hidden dark:block"
+          width={1200}
+          height={800}
+          className="hidden dark:block"
           draggable={false}
           priority
         />

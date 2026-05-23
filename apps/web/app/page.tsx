@@ -14,6 +14,7 @@ import {
 import { ThemeToggle } from "@/src/components/theme-toggle";
 import { HeroShapes } from "@/src/components/hero-shapes";
 import { KanbanScrollPreview } from "@/src/components/kanban-scroll-preview";
+import { FadeUp } from "@/src/components/fade-up";
 
 export const metadata: Metadata = {
   title: "Shipyard — Project management for dev teams",
@@ -151,33 +152,39 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-4xl">
           {/* Badge */}
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur-sm">
-            <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-            Open source · Built with Next.js, tRPC & Prisma
-          </div>
+          <FadeUp delay={0.5}>
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur-sm">
+              <span className="size-1.5 animate-pulse rounded-full bg-primary" />
+              Open source · Built with Next.js, tRPC & Prisma
+            </div>
+          </FadeUp>
 
           {/* Headline */}
-          <h1 className="mb-6 text-5xl font-extrabold leading-[1.08] tracking-tighter sm:text-6xl lg:text-[4.75rem]">
-            Ship faster,{" "}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage:
-                  "linear-gradient(135deg, oklch(50.8% 0.118 165.612) 0%, oklch(68% 0.16 175) 100%)",
-              }}
-            >
-              together.
-            </span>
-          </h1>
+          <FadeUp delay={0.62}>
+            <h1 className="mb-6 text-5xl font-extrabold leading-[1.08] tracking-tighter sm:text-6xl lg:text-[4.75rem]">
+              Ship faster,{" "}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(135deg, oklch(50.8% 0.118 165.612) 0%, oklch(68% 0.16 175) 100%)",
+                }}
+              >
+                together.
+              </span>
+            </h1>
+          </FadeUp>
 
           {/* Subtext */}
-          <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground sm:text-lg">
-            Lightweight project management for small dev teams. Kanban boards,
-            real-time presence, and team tools &mdash; no enterprise bloat.
-          </p>
+          <FadeUp delay={0.72}>
+            <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground sm:text-lg">
+              Lightweight project management for small dev teams. Kanban boards,
+              real-time presence, and team tools &mdash; no enterprise bloat.
+            </p>
+          </FadeUp>
 
           {/* CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <FadeUp delay={0.82} className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/login"
               className="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-7 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
@@ -201,11 +208,13 @@ export default function LandingPage() {
               </svg>
               View on GitHub
             </a>
-          </div>
+          </FadeUp>
 
-          <p className="mt-5 text-xs text-muted-foreground">
-            Free for 1 project · No credit card required
-          </p>
+          <FadeUp delay={0.9}>
+            <p className="mt-5 text-xs text-muted-foreground">
+              Free for 1 project · No credit card required
+            </p>
+          </FadeUp>
         </div>
       </section>
 
@@ -215,19 +224,19 @@ export default function LandingPage() {
       {/* ── Features ──────────────────────────────────────────────────────── */}
       <section id="features" className="px-6 pb-28">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-14 text-center">
+          <FadeUp className="mb-14 text-center">
             <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
               Everything your team needs
             </h2>
             <p className="mt-3 text-muted-foreground">
               No fluff. Just the tools that help you ship.
             </p>
-          </div>
+          </FadeUp>
 
           {/* Feature grid */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Kanban — wide card */}
-            <div className="group relative overflow-hidden rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50 md:col-span-2">
+            <FadeUp className="group relative overflow-hidden rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50 md:col-span-2">
               <div className="mb-4 text-primary">
                 <FolderKanban className="size-10" />
               </div>
@@ -355,10 +364,10 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </FadeUp>
 
             {/* Presence */}
-            <div className="relative overflow-hidden rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp delay={0.07} className="relative overflow-hidden rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
               <div className="mb-4 text-primary">
                 <Users className="size-10" />
               </div>
@@ -398,10 +407,10 @@ export default function LandingPage() {
                   active right now
                 </p>
               </div>
-            </div>
+            </FadeUp>
 
             {/* Search */}
-            <div className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp delay={0.12} className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
               <div className="mb-4 text-primary">
                 <Search className="size-10" />
               </div>
@@ -413,10 +422,10 @@ export default function LandingPage() {
                 </kbd>{" "}
                 from anywhere.
               </p>
-            </div>
+            </FadeUp>
 
             {/* Activity */}
-            <div className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp delay={0.17} className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
               <div className="mb-4 text-primary">
                 <Activity className="size-10" />
               </div>
@@ -425,10 +434,10 @@ export default function LandingPage() {
                 Full audit trail of every action taken across your org. Know who
                 did what and when.
               </p>
-            </div>
+            </FadeUp>
 
             {/* Role-based access */}
-            <div className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp delay={0.22} className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
               <div className="mb-4 text-primary">
                 <ShieldCheck className="size-10" />
               </div>
@@ -437,7 +446,7 @@ export default function LandingPage() {
                 Assign owners, admins, members, and viewers. Control who can see
                 and change what across your organization.
               </p>
-            </div>
+            </FadeUp>
           </div>
         </div>
       </section>
@@ -445,19 +454,20 @@ export default function LandingPage() {
       {/* ── Pricing ───────────────────────────────────────────────────────── */}
       <section id="pricing" className="px-6 pb-28">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-14 text-center">
+          <FadeUp className="mb-14 text-center">
             <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
               Simple, honest pricing
             </h2>
             <p className="mt-3 text-muted-foreground">
               Start free, scale when you need to.
             </p>
-          </div>
+          </FadeUp>
 
           <div className="grid grid-cols-1 gap-6 md:gap-0 sm:grid-cols-3">
-            {plans.map((plan) => (
-              <div
+            {plans.map((plan, i) => (
+              <FadeUp
                 key={plan.name}
+                delay={i * 0.1}
                 className={`relative flex flex-col bg-zinc-500/5  border p-7 rounded-xl ${
                   plan.highlight
                     ? "border-primary/50! bg-primary/5! md:-my-6 rounded-xl"
@@ -504,7 +514,7 @@ export default function LandingPage() {
                 >
                   {plan.cta}
                 </Link>
-              </div>
+              </FadeUp>
             ))}
           </div>
         </div>
@@ -531,7 +541,7 @@ export default function LandingPage() {
             }}
           />
 
-          <div className="relative">
+          <FadeUp className="relative">
             <div className="mx-auto mb-5 flex items-center justify-center">
               <Zap className="size-10 text-primary" />
             </div>
@@ -548,7 +558,7 @@ export default function LandingPage() {
               Create your workspace
               <ArrowRight className="size-4" />
             </Link>
-          </div>
+          </FadeUp>
         </div>
       </section>
 
