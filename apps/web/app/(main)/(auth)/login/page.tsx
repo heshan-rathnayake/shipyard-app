@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";
 import { LoginButtons } from "./login-buttons";
 

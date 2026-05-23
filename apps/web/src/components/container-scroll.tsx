@@ -1,7 +1,13 @@
 "use client";
 
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
-import React, { useRef, useEffect, useState } from "react";
+import {
+  type MotionValue,
+  motion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function ContainerScroll({
   titleComponent,
@@ -45,10 +51,7 @@ export function ContainerScroll({
       // Vertical padding gives breathing room above and below.
       className="relative flex flex-col items-center justify-center px-4 py-20 md:py-28"
     >
-      <div
-        className="relative w-full"
-        style={{ perspective: "1200px" }}
-      >
+      <div className="relative w-full" style={{ perspective: "1200px" }}>
         {titleComponent && (
           <motion.div
             style={{ translateY }}

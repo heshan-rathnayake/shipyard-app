@@ -1,5 +1,5 @@
-import { Separator } from "@shipyard/ui/components/separator";
 import { db } from "@shipyard/db";
+import { Separator } from "@shipyard/ui/components/separator";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";

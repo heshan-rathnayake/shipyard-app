@@ -82,7 +82,9 @@ export function DeleteOrgButton({ orgId, orgName }: DeleteOrgButtonProps) {
           />
 
           {deleteOrg.error && (
-            <p className="text-sm text-destructive">{deleteOrg.error.message}</p>
+            <p className="text-sm text-destructive">
+              {deleteOrg.error.message}
+            </p>
           )}
         </div>
 

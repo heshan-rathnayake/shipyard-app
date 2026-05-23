@@ -74,7 +74,10 @@ export async function changePassword(
     });
   } catch (err) {
     logger.error("[changePassword] unexpected error:", err);
-    return { status: "error", message: "Something went wrong. Please try again." };
+    return {
+      status: "error",
+      message: "Something went wrong. Please try again.",
+    };
   }
 
   return { status: "success" };
@@ -90,7 +93,7 @@ export type DeleteAccountState =
 
 export async function deleteAccount(
   _prev: DeleteAccountState,
-  formData: FormData
+  _formData: FormData
 ): Promise<DeleteAccountState> {
   const session = await auth();
   if (!session) return { status: "error", message: "Not authenticated." };
@@ -125,7 +128,10 @@ export async function deleteAccount(
     await db.user.delete({ where: { id: userId } });
   } catch (err) {
     logger.error("[deleteAccount] unexpected error:", err);
-    return { status: "error", message: "Something went wrong. Please try again." };
+    return {
+      status: "error",
+      message: "Something went wrong. Please try again.",
+    };
   }
 
   return { status: "success" };

@@ -141,12 +141,12 @@ export function GlobalSearch() {
   // Reset selection when results change
   useEffect(() => {
     setSelectedIndex(0);
-  }, [debouncedQuery]);
+  }, []);
 
   // ── Server search ───────────────────────────────────────────────────────────
   const { data, isFetching } = trpc.search.global.useQuery(
     { orgSlug: orgSlug ?? undefined, query: debouncedQuery },
-    { enabled: debouncedQuery.length >= 2 },
+    { enabled: debouncedQuery.length >= 2 }
   );
 
   // ── Client-side nav matching (instant, no debounce needed) ──────────────────
@@ -164,7 +164,10 @@ export function GlobalSearch() {
     return [
       ...navResults.map((n) => ({ kind: "nav" as const, ...n })),
       ...(data?.orgs ?? []).map((o) => ({ kind: "org" as const, ...o })),
-      ...(data?.projects ?? []).map((p) => ({ kind: "project" as const, ...p })),
+      ...(data?.projects ?? []).map((p) => ({
+        kind: "project" as const,
+        ...p,
+      })),
       ...(data?.members ?? []).map((m) => ({ kind: "member" as const, ...m })),
     ];
   }, [navResults, data]);
@@ -195,7 +198,11 @@ export function GlobalSearch() {
   }
 
   const hasResults = flatItems.length > 0;
-  const showEmpty = debouncedQuery.length >= 2 && !isFetching && !hasResults && navResults.length === 0;
+  const showEmpty =
+    debouncedQuery.length >= 2 &&
+    !isFetching &&
+    !hasResults &&
+    navResults.length === 0;
 
   // Index offsets for each group in flatItems
   const orgOffset = navResults.length;
@@ -243,7 +250,7 @@ export function GlobalSearch() {
                 if (e.key === "ArrowDown") {
                   e.preventDefault();
                   setSelectedIndex((i) =>
-                    Math.min(i + 1, flatItems.length - 1),
+                    Math.min(i + 1, flatItems.length - 1)
                   );
                 } else if (e.key === "ArrowUp") {
                   e.preventDefault();
@@ -307,7 +314,7 @@ export function GlobalSearch() {
                     <p className="px-4 pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Organizations
                     </p>
-                    {data!.orgs.map((org, i) => {
+                    {data?.orgs.map((org, i) => {
                       const idx = orgOffset + i;
                       return (
                         <button
@@ -340,7 +347,7 @@ export function GlobalSearch() {
                     <p className="px-4 pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Projects
                     </p>
-                    {data!.projects.map((project, i) => {
+                    {data?.projects.map((project, i) => {
                       const idx = projectOffset + i;
                       return (
                         <button
@@ -375,7 +382,7 @@ export function GlobalSearch() {
                     <p className="px-4 pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Members
                     </p>
-                    {data!.members.map((member, i) => {
+                    {data?.members.map((member, i) => {
                       const idx = memberOffset + i;
                       return (
                         <button

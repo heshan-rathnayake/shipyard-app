@@ -1,10 +1,6 @@
+import { Card, CardContent, CardHeader } from "@shipyard/ui/components/card";
 import { Separator } from "@shipyard/ui/components/separator";
 import { Skeleton } from "@shipyard/ui/components/skeleton";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@shipyard/ui/components/card";
 
 export default function ProjectsLoading() {
   return (

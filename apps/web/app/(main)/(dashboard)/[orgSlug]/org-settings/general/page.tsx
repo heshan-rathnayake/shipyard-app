@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
 import { Separator } from "@shipyard/ui/components/separator";
+import type { Metadata } from "next";
 import { requireOrgMembership } from "@/server/requireOrgMembership";
 import { BreadcrumbSetter } from "@/src/components/breadcrumb-setter";
-import { OrgNameForm } from "./_components/org-name-form";
 import { DeleteOrgButton } from "./_components/delete-org-button";
+import { OrgNameForm } from "./_components/org-name-form";
 
 export const metadata: Metadata = { title: "General settings" };
 
@@ -61,7 +61,9 @@ export default async function GeneralSettingsPage({
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">Delete this organization</p>
+                    <p className="text-sm font-medium">
+                      Delete this organization
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       Permanently remove{" "}
                       <strong className="text-foreground">

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { cn } from "@shipyard/ui/lib/utils";
+import { motion } from "framer-motion";
 
 function ElegantShape({
   className,

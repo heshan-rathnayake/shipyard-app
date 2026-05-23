@@ -13,10 +13,10 @@ import {
 import { Input } from "@shipyard/ui/components/input";
 import { Label } from "@shipyard/ui/components/label";
 import { Loader2, Trash2 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { useActionState, useEffect, useState } from "react";
-import { deleteAccount, type DeleteAccountState } from "../actions";
+import { type DeleteAccountState, deleteAccount } from "../actions";
 
 const initialState: DeleteAccountState = { status: "idle" };
 
@@ -27,7 +27,10 @@ interface DeleteAccountButtonProps {
 export function DeleteAccountButton({ email }: DeleteAccountButtonProps) {
   const [open, setOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
-  const [state, action, isPending] = useActionState(deleteAccount, initialState);
+  const [state, action, isPending] = useActionState(
+    deleteAccount,
+    initialState
+  );
 
   // On success, the user record is gone — sign out and redirect to home.
   useEffect(() => {
@@ -95,7 +98,9 @@ export function DeleteAccountButton({ email }: DeleteAccountButtonProps) {
           {state.status !== "blocked" && (
             <>
               <Label htmlFor="confirm-email">
-                Type <span className="font-semibold text-foreground">{email}</span> to confirm
+                Type{" "}
+                <span className="font-semibold text-foreground">{email}</span>{" "}
+                to confirm
               </Label>
               <Input
                 id="confirm-email"

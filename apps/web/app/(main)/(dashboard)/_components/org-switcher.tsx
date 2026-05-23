@@ -19,12 +19,12 @@ import {
 } from "@shipyard/ui/components/sidebar";
 import { Skeleton } from "@shipyard/ui/components/skeleton";
 import { ChevronsUpDown, Plus } from "lucide-react";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { UpgradeDialog } from "@/src/components/upgrade-dialog";
 import { useOrgStore } from "@/src/stores/org-store";
 import { CreateOrgDialog } from "./create-org-dialog";
-import Image from "next/image";
 
 interface Org {
   id: string;

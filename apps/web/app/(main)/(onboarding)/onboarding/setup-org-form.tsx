@@ -4,12 +4,11 @@ import { toSlug } from "@shipyard/api/lib/slug";
 import { Button } from "@shipyard/ui/components/button";
 import { Input } from "@shipyard/ui/components/input";
 import { Label } from "@shipyard/ui/components/label";
-import { Building2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { trpc } from "@/src/providers/trpc-react-provider";
-import Link from "next/link";
-import Image from "next/image";
 
 export function SetupOrgForm() {
   const router = useRouter();
@@ -140,7 +139,7 @@ export function SetupOrgForm() {
                         {item}
                       </span>
                     </div>
-                  ),
+                  )
                 )}
               </div>
             </div>

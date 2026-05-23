@@ -1,6 +1,3 @@
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import {
   Activity,
   ArrowRight,
@@ -11,10 +8,13 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { ThemeToggle } from "@/src/components/theme-toggle";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { FadeUp } from "@/src/components/fade-up";
 import { HeroShapes } from "@/src/components/hero-shapes";
 import { KanbanScrollPreview } from "@/src/components/kanban-scroll-preview";
-import { FadeUp } from "@/src/components/fade-up";
+import { ThemeToggle } from "@/src/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "Shipyard — Project management for dev teams",
@@ -184,7 +184,10 @@ export default function LandingPage() {
           </FadeUp>
 
           {/* CTAs */}
-          <FadeUp delay={0.82} className="flex flex-wrap items-center justify-center gap-4">
+          <FadeUp
+            delay={0.82}
+            className="flex flex-wrap items-center justify-center gap-4"
+          >
             <Link
               href="/login"
               className="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-7 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
@@ -367,7 +370,10 @@ export default function LandingPage() {
             </FadeUp>
 
             {/* Presence */}
-            <FadeUp delay={0.07} className="relative overflow-hidden rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp
+              delay={0.07}
+              className="relative overflow-hidden rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50"
+            >
               <div className="mb-4 text-primary">
                 <Users className="size-10" />
               </div>
@@ -410,7 +416,10 @@ export default function LandingPage() {
             </FadeUp>
 
             {/* Search */}
-            <FadeUp delay={0.12} className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp
+              delay={0.12}
+              className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50"
+            >
               <div className="mb-4 text-primary">
                 <Search className="size-10" />
               </div>
@@ -425,7 +434,10 @@ export default function LandingPage() {
             </FadeUp>
 
             {/* Activity */}
-            <FadeUp delay={0.17} className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp
+              delay={0.17}
+              className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50"
+            >
               <div className="mb-4 text-primary">
                 <Activity className="size-10" />
               </div>
@@ -437,7 +449,10 @@ export default function LandingPage() {
             </FadeUp>
 
             {/* Role-based access */}
-            <FadeUp delay={0.22} className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50">
+            <FadeUp
+              delay={0.22}
+              className="rounded-xl border border-border bg-muted/30 p-7 transition-colors hover:bg-muted/50"
+            >
               <div className="mb-4 text-primary">
                 <ShieldCheck className="size-10" />
               </div>

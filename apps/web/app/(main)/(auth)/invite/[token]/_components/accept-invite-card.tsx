@@ -1,11 +1,8 @@
 "use client";
 
 import { Button } from "@shipyard/ui/components/button";
-import { Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/src/providers/trpc-react-provider";
-import Link from "next/link";
-import Image from "next/image";
 
 type MemberRole = "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
 

@@ -21,7 +21,12 @@ interface ProfileFormProps {
   providers: string[];
 }
 
-export function ProfileForm({ name, email, image, providers }: ProfileFormProps) {
+export function ProfileForm({
+  name,
+  email,
+  image,
+  providers,
+}: ProfileFormProps) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(name ?? "");
 

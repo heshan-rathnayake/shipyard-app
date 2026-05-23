@@ -6,10 +6,7 @@ import { Label } from "@shipyard/ui/components/label";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
-import {
-  requestPasswordReset,
-  type ForgotPasswordState,
-} from "./actions";
+import { type ForgotPasswordState, requestPasswordReset } from "./actions";
 
 const initialState: ForgotPasswordState = { status: "idle" };
 
@@ -28,7 +25,9 @@ export function ForgotPasswordForm() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <h1 className="text-2xl font-bold tracking-tight">Check your inbox</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Check your inbox
+          </h1>
           <p className="text-sm text-muted-foreground">
             If an account with that email exists, we&apos;ve sent a password
             reset link. It expires in 1 hour.
@@ -75,9 +74,7 @@ export function ForgotPasswordForm() {
         )}
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? (
-            <Loader2 className="size-4 animate-spin mr-2" />
-          ) : null}
+          {isPending ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
           {isPending ? "Sending…" : "Send reset link"}
         </Button>
       </form>

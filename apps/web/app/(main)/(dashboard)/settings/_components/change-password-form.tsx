@@ -5,12 +5,15 @@ import { Input } from "@shipyard/ui/components/input";
 import { Label } from "@shipyard/ui/components/label";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useRef } from "react";
-import { changePassword, type ChangePasswordState } from "../actions";
+import { type ChangePasswordState, changePassword } from "../actions";
 
 const initialState: ChangePasswordState = { status: "idle" };
 
 export function ChangePasswordForm() {
-  const [state, action, isPending] = useActionState(changePassword, initialState);
+  const [state, action, isPending] = useActionState(
+    changePassword,
+    initialState
+  );
   const formRef = useRef<HTMLFormElement>(null);
 
   // Clear the form fields on success
@@ -64,7 +67,9 @@ export function ChangePasswordForm() {
         )}
 
         <Button type="submit" size="sm" disabled={isPending}>
-          {isPending ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : null}
+          {isPending ? (
+            <Loader2 className="size-3.5 animate-spin mr-1.5" />
+          ) : null}
           {isPending ? "Saving…" : "Update password"}
         </Button>
       </form>

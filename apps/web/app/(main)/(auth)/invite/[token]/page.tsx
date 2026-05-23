@@ -1,12 +1,12 @@
 import { db } from "@shipyard/db";
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 import { auth } from "@/server/auth";
 import { AcceptInviteCard } from "./_components/accept-invite-card";
 import { SwitchAccountButton } from "./_components/switch-account-button";
-import Link from "next/link";
-import Image from "next/image";
 
 export const metadata: Metadata = { title: "Accept invitation" };
 

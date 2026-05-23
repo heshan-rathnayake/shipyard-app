@@ -5,7 +5,7 @@ import { Input } from "@shipyard/ui/components/input";
 import { Label } from "@shipyard/ui/components/label";
 import { Loader2 } from "lucide-react";
 import { useActionState } from "react";
-import { resetPassword, type ResetPasswordState } from "./actions";
+import { type ResetPasswordState, resetPassword } from "./actions";
 
 const initialState: ResetPasswordState = { status: "idle" };
 
@@ -23,7 +23,9 @@ export function ResetPasswordForm({ token, email }: ResetPasswordFormProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-bold tracking-tight">Choose a new password</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Choose a new password
+        </h1>
         <p className="text-sm text-muted-foreground">
           Enter a new password for{" "}
           <span className="font-medium text-foreground">{email}</span>.
@@ -57,9 +59,7 @@ export function ResetPasswordForm({ token, email }: ResetPasswordFormProps) {
         )}
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? (
-            <Loader2 className="size-4 animate-spin mr-2" />
-          ) : null}
+          {isPending ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
           {isPending ? "Saving…" : "Set new password"}
         </Button>
       </form>
