@@ -38,8 +38,8 @@ export default async function WebhooksPage({
           <span className="font-medium">Portfolio note:</span> In a production
           platform, Stripe webhook logs would be restricted to internal
           operators via a separate admin panel — not exposed within org
-          settings. This page is included here to demonstrate webhook
-          processing and event lifecycle tracking.
+          settings. This page is included here to demonstrate webhook processing
+          and event lifecycle tracking.
         </p>
       </div>
 
