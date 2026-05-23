@@ -1,6 +1,7 @@
 import { router } from "../trpc";
 import { activityLogRouter } from "./activityLog";
 import { commentRouter } from "./comment";
+import { dashboardRouter } from "./dashboard";
 import { memberRouter } from "./member";
 import { organizationRouter } from "./organization";
 import { projectRouter } from "./project";
@@ -12,6 +13,7 @@ import { userRouter } from "./user";
 
 export const appRouter = router({
   organization: organizationRouter,
+  dashboard: dashboardRouter,
   member: memberRouter,
   activityLog: activityLogRouter,
   project: projectRouter,
