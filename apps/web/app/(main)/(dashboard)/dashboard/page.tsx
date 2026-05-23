@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-7xl">
       <DashboardContent
         memberships={memberships.map((m) => ({
           role: m.role,
