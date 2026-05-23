@@ -5,6 +5,7 @@ import { ORG_OWNER_LIMITS } from "../../config/plans";
 import { ActivityAction, EntityType, logActivity } from "../../lib/activityLog";
 import { requireMembership } from "../../lib/membership";
 import { toSlug } from "../../lib/slug";
+import { getStripe } from "../../lib/stripe";
 import { protectedProcedure, router } from "../trpc";
 
 export const organizationRouter = router({
@@ -211,6 +212,33 @@ export const organizationRouter = router({
           code: "FORBIDDEN",
           message: "Only organization owners can delete the organization.",
         });
+      }
+
+      // Cancel the Stripe subscription immediately before deleting the org.
+      // The Subscription DB row will be removed by Prisma cascade, but Stripe
+      // is a separate system — it must be explicitly cancelled or it keeps billing.
+      const subscription = await ctx.db.subscription.findUnique({
+        where: { organizationId: input.orgId },
+        select: { stripeSubscriptionId: true },
+      });
+
+      if (subscription?.stripeSubscriptionId) {
+        try {
+          const stripe = getStripe();
+          await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+          logger.info("Stripe subscription cancelled on org delete", {
+            orgId: input.orgId,
+            stripeSubscriptionId: subscription.stripeSubscriptionId,
+          });
+        } catch (err) {
+          // Log but don't block deletion — the subscription may already be
+          // cancelled on Stripe's side (e.g. payment failure, manual cancel).
+          logger.warn("Failed to cancel Stripe subscription on org delete", {
+            orgId: input.orgId,
+            stripeSubscriptionId: subscription.stripeSubscriptionId,
+            error: String(err),
+          });
+        }
       }
 
       // No audit log — cascade delete removes all ActivityLog rows anyway
