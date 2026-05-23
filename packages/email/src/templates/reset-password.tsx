@@ -13,7 +13,10 @@ export interface ResetPasswordEmailProps {
   resetUrl: string;
 }
 
-export function ResetPasswordEmail({ name, resetUrl }: ResetPasswordEmailProps) {
+export function ResetPasswordEmail({
+  name,
+  resetUrl,
+}: ResetPasswordEmailProps) {
   return (
     <EmailShell preview="Reset your Shipyard password">
       <Text style={styles.badgeWarn}>🔑 Password reset</Text>
@@ -32,10 +35,7 @@ export function ResetPasswordEmail({ name, resetUrl }: ResetPasswordEmailProps) 
       <Text style={styles.note}>
         Or copy this link into your browser:
         <br />
-        <a
-          href={resetUrl}
-          style={{ color: "#09090b", wordBreak: "break-all" }}
-        >
+        <a href={resetUrl} style={{ color: "#09090b", wordBreak: "break-all" }}>
           {resetUrl}
         </a>
       </Text>

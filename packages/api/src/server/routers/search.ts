@@ -43,7 +43,10 @@ export const searchRouter = router({
       });
 
       if (!org) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Organization not found.",
+        });
       }
 
       await requireMembership(ctx.db, ctx.session.user.id, org.id);
@@ -73,7 +76,9 @@ export const searchRouter = router({
             })),
           },
           select: {
-            user: { select: { id: true, name: true, email: true, image: true } },
+            user: {
+              select: { id: true, name: true, email: true, image: true },
+            },
           },
           take: 5,
           orderBy: { joinedAt: "asc" },
