@@ -37,63 +37,73 @@ export function SignupForm({ callbackUrl }: { callbackUrl?: string }) {
   }
 
   return (
-    <form action={action} className="space-y-4">
-      {callbackUrl && (
-        <input type="hidden" name="callbackUrl" value={callbackUrl} />
-      )}
-      <div className="space-y-1.5">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          name="name"
-          placeholder="Ada Lovelace"
-          autoComplete="name"
-          required
-          minLength={2}
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="ada@example.com"
-          autoComplete="email"
-          required
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="Min. 8 characters"
-          autoComplete="new-password"
-          required
-          minLength={8}
-        />
-      </div>
-
-      {state.status === "error" && (
-        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {state.message}
+    <>
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Create your account
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Start shipping with your team
         </p>
-      )}
+      </div>
+      <form action={action} className="space-y-4">
+        {callbackUrl && (
+          <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        )}
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            placeholder="Ada Lovelace"
+            autoComplete="name"
+            required
+            minLength={2}
+          />
+        </div>
 
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? "Creating account…" : "Create account"}
-      </Button>
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="ada@example.com"
+            autoComplete="email"
+            required
+          />
+        </div>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/login" className="underline underline-offset-4">
-          Sign in
-        </Link>
-      </p>
-    </form>
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Min. 8 characters"
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+        </div>
+
+        {state.status === "error" && (
+          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {state.message}
+          </p>
+        )}
+
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Creating account…" : "Create account"}
+        </Button>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="underline underline-offset-4">
+            Sign in
+          </Link>
+        </p>
+      </form>
+    </>
   );
 }

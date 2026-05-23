@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@shipyard/ui/components/button";
-import { Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/src/providers/trpc-react-provider";
 
@@ -41,9 +40,6 @@ export function AcceptInviteCard({
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="space-y-2 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <Building2 className="size-6" />
-        </div>
         <h1 className="text-2xl font-bold tracking-tight">You're invited</h1>
         <p className="text-sm text-muted-foreground">
           Join <strong>{orgName}</strong> as a{" "}

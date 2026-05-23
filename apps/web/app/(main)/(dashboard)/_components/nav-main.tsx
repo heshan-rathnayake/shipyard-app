@@ -24,6 +24,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   Settings,
+  SlidersHorizontal,
   Users,
   Webhook,
 } from "lucide-react";
@@ -162,6 +163,19 @@ export function NavMain({
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={pathname.startsWith(
+                              `/${orgSlug}/org-settings/general`
+                            )}
+                          >
+                            <Link href={`/${orgSlug}/org-settings/general`}>
+                              <SlidersHorizontal />
+                              <span>General</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton
                             asChild

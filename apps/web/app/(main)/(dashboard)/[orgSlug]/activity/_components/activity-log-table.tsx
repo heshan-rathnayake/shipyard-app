@@ -176,7 +176,9 @@ export function ActivityLogTable({
   );
 
   const emptyState = isFetching ? (
-    <Loader message="Loading…" size={4} />
+    <div className="w-full flex items-center justify-center py-10">
+      <Loader message="Loading…" size={4} />
+    </div>
   ) : (
     <span>
       {search || entityType !== "ALL"

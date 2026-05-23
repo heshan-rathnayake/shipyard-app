@@ -8,6 +8,7 @@ import { TooltipProvider } from "@shipyard/ui/components/tooltip";
 import { AppBreadcrumb } from "@/src/components/app-breadcrumb";
 import { BreadcrumbProvider } from "@/src/providers/breadcrumb-provider";
 import { AppSidebar } from "./_components/app-sidebar";
+import { GlobalSearch } from "./_components/global-search";
 
 // Auth is read here for display only — redirects live in page.tsx per convention
 export default function DashboardLayout({
@@ -25,6 +26,7 @@ export default function DashboardLayout({
               <SidebarTrigger className="-ml-1 min-w-9" />
               <Separator orientation="vertical" className="mr-2 h-full" />
               <AppBreadcrumb />
+              <GlobalSearch />
             </header>
             <main
               className="relative flex-1 p-6"

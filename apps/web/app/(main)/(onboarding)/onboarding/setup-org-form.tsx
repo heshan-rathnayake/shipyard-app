@@ -4,7 +4,8 @@ import { toSlug } from "@shipyard/api/lib/slug";
 import { Button } from "@shipyard/ui/components/button";
 import { Input } from "@shipyard/ui/components/input";
 import { Label } from "@shipyard/ui/components/label";
-import { Building2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { trpc } from "@/src/providers/trpc-react-provider";
@@ -15,7 +16,7 @@ export function SetupOrgForm() {
   const slug = toSlug(name);
 
   const createOrg = trpc.organization.create.useMutation({
-    onSuccess: () => router.push("/dashboard"),
+    onSuccess: () => router.push(`/${slug}/members`),
   });
 
   function handleSubmit() {
@@ -26,15 +27,24 @@ export function SetupOrgForm() {
   return (
     <div className="flex min-h-screen">
       {/* ── Left: form ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col justify-center px-8 py-12 lg:px-16">
+      <div className="relative flex flex-1 flex-col justify-center px-8 py-12 lg:px-16">
         <div className="mx-auto w-full max-w-sm space-y-8">
           {/* Brand mark */}
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Building2 className="size-4" />
-            </div>
-            <span className="font-semibold tracking-tight">Shipyard</span>
-          </div>
+          <Link
+            href="/"
+            className="absolute top-4 left-4 flex w-fit items-center gap-2.5"
+          >
+            <Image
+              src="/logo.png"
+              alt="Shipyard logo"
+              width={28}
+              height={28}
+              className="shrink-0"
+            />
+            <span className="text-[15px] font-semibold tracking-tight">
+              Shipyard
+            </span>
+          </Link>
 
           <div className="space-y-2">
             <h1 className="text-2xl font-bold tracking-tight">
@@ -101,9 +111,13 @@ export function SetupOrgForm() {
             <div className="space-y-3 p-4">
               {/* Org header */}
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-                  {name ? name.slice(0, 2).toUpperCase() : "??"}
-                </div>
+                <Image
+                  src="/logo.png"
+                  alt="Shipyard logo"
+                  width={28}
+                  height={28}
+                  className="shrink-0"
+                />
                 <div className="min-w-0">
                   <p className="truncate font-semibold leading-tight">
                     {name || "Organization name"}

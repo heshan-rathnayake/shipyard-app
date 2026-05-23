@@ -12,6 +12,7 @@ export enum ActivityAction {
   INVITATION_CANCELLED = "INVITATION_CANCELLED",
   // Organization actions
   ORG_CREATED = "ORG_CREATED",
+  ORG_UPDATED = "ORG_UPDATED",
   // Project actions
   PROJECT_CREATED = "PROJECT_CREATED",
   PROJECT_UPDATED = "PROJECT_UPDATED",
