@@ -12,6 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import { ThemeToggle } from "@/src/components/theme-toggle";
+import { HeroShapes } from "@/src/components/hero-shapes";
 
 export const metadata: Metadata = {
   title: "Shipyard — Project management for dev teams",
@@ -127,6 +128,8 @@ export default function LandingPage() {
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative flex flex-col items-center overflow-hidden px-6 pb-32 pt-40 text-center">
+        {/* Animated floating shapes */}
+        <HeroShapes />
         {/* Grid texture */}
         <div
           className="pointer-events-none absolute inset-0"
