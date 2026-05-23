@@ -1,8 +1,10 @@
 import { Separator } from "@shipyard/ui/components/separator";
-import type { Metadata } from "next";
-import { auth } from "@/server/auth";
 import { db } from "@shipyard/db";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { auth } from "@/server/auth";
+import { ChangePasswordForm } from "./_components/change-password-form";
+import { DeleteAccountButton } from "./_components/delete-account-button";
 import { ProfileForm } from "./_components/profile-form";
 import { ThemeSelector } from "./_components/theme-selector";
 
@@ -23,10 +25,12 @@ export default async function SettingsPage() {
     },
   });
 
+  const hasPassword = !!user?.password;
+
   // Build provider list — include "credentials" if they have a password row
   const providers = [
     ...(user?.accounts.map((a) => a.provider) ?? []),
-    ...(user?.password ? ["credentials"] : []),
+    ...(hasPassword ? ["credentials"] : []),
   ];
 
   return (
@@ -58,6 +62,23 @@ export default async function SettingsPage() {
 
       <Separator />
 
+      {/* Password — credentials users only */}
+      {hasPassword && (
+        <>
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-base font-semibold">Password</h2>
+              <p className="text-sm text-muted-foreground">
+                Update the password used to sign in to your account.
+              </p>
+            </div>
+            <ChangePasswordForm />
+          </section>
+
+          <Separator />
+        </>
+      )}
+
       {/* Appearance */}
       <section className="space-y-3">
         <div>
@@ -67,6 +88,36 @@ export default async function SettingsPage() {
           </p>
         </div>
         <ThemeSelector />
+      </section>
+
+      <Separator />
+
+      {/* Danger zone */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-base font-semibold text-destructive">
+            Danger zone
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Irreversible actions that affect your entire account.
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Delete this account</p>
+              <p className="text-sm text-muted-foreground">
+                Permanently delete your account and remove you from all
+                organizations. You must delete or transfer any organizations you
+                solely own first.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <DeleteAccountButton email={user?.email ?? ""} />
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );
